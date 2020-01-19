@@ -47,4 +47,5 @@ bool fan2_flag = false;
 bool beeper_flag = true;
 bool err_flag = false;
 String err_str = "";
+int err_delay = 6;
 //err_str += "RTC, ";

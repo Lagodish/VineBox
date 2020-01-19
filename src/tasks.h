@@ -29,12 +29,7 @@ void Light( void * parameter )
         ledcWrite(2, briG);
         ledcWrite(4, briW);
 
-  briW = briW + briW; 
-  if (briW <= 10 || briW >= 150) {
-    briW = -briW;
-  }
-
- vTaskDelay(20);    
+        vTaskDelay(100);    
 
     }
 
@@ -123,8 +118,37 @@ void BLE( void * parameter)
             Serial.print(str);
             
             if(str.equals("help\r\n")||str.equals("h\r\n")||str.equals("Help\r\n")){
-                   ESP_BT.println("Available commands help/h, set/s, flags/f, time, temp/t, reboot"); 
+                   ESP_BT.println("Available commands help/h, set/s, flags/f, time, temp/t, light/l reboot"); 
             }
+
+            if(str.equals("Light\r\n")||str.equals("l\r\n")||str.equals("light\r\n")){
+
+                ESP_BT.print("Please write r,g,b,w, one by one. (0-255)");
+        int val[3];
+
+        for(int i=0; i< 6; i++){
+
+        while (!ESP_BT.available())
+        {
+         vTaskDelay(10);   
+        }
+                       
+        val[i]=ESP_BT.parseInt();
+
+        if(val[i]==0){
+            i--;
+            continue;
+        }
+        }
+
+        briR = val[0];
+        briG = val[1];
+        briB = val[2];
+        briW = val[3];
+
+        ESP_BT.println("OK!"); 
+    }
+
             if(str.equals("temp\r\n")||str.equals("t\r\n")){
                 if(numberOfDevices==0){
                     ESP_BT.print("No devices found!");
@@ -368,6 +392,13 @@ void Static( void * parameter)
     
     while(1){
 
+    if(err_flag){
+        err_delay = 2;
+    }
+    else{
+        err_delay = 6;
+    }
+
     if(old_Value != intTriggerCount){
         old_Value = intTriggerCount; // something to compare against
         Serial.println("Int!");
@@ -393,7 +424,7 @@ void led( void * parameter)
     fadeAmount = -fadeAmount;
   }
 
- vTaskDelay(5);    
+ vTaskDelay(err_delay);    
 
     }
 

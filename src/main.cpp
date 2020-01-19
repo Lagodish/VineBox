@@ -3,7 +3,6 @@
 #include <const.h>
 #include <tasks.h>
 
-//test
 
 
 void setup() {
@@ -11,17 +10,17 @@ void setup() {
   Serial.begin(9600); //Uart
   Serial1.begin(9600); //Displayt  
   
-   ledcSetup(0, 1000, 8);
-   ledcSetup(1, 1000, 8);
-   ledcSetup(2, 1000, 8);
-   ledcSetup(3, 1000, 8);
-   ledcSetup(4, 1000, 8);
+  ledcSetup(0, 1000, 8);
+  ledcSetup(1, 1000, 8);
+  ledcSetup(2, 1000, 8);
+  ledcSetup(3, 1000, 8);
+  ledcSetup(4, 1000, 8);
 
-   ledcAttachPin(GP3, 0);
-   ledcAttachPin(R, 1);
-   ledcAttachPin(G, 2);
-   ledcAttachPin(B, 3);
-   ledcAttachPin(W, 4);
+  ledcAttachPin(GP3, 0);
+  ledcAttachPin(R, 1);
+  ledcAttachPin(G, 2);
+  ledcAttachPin(B, 3);
+  ledcAttachPin(W, 4);
 
   pinMode(R ,OUTPUT);
   pinMode(G ,OUTPUT);
@@ -30,7 +29,6 @@ void setup() {
   pinMode(F1 ,OUTPUT);
   pinMode(F2 ,OUTPUT);
   pinMode(GP3 ,OUTPUT);
-  pinMode(W ,OUTPUT);
   
   pinMode(GP1,INPUT_PULLUP);
   pinMode(GP2,INPUT_PULLUP);
