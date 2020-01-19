@@ -117,16 +117,16 @@ void BLE( void * parameter)
             String str = ESP_BT.readString();
             Serial.print(str);
             
-            if(str.equals("help\r\n")||str.equals("h\r\n")||str.equals("Help\r\n")){
-                   ESP_BT.println("Available commands help/h, set/s, flags/f, time, temp/t, light/l reboot"); 
-            }
+    if(str.equals("help\r\n")||str.equals("h\r\n")||str.equals("Help\r\n")){
+        ESP_BT.println("Available commands help/h, set/s, flags/f, time, temp/t, light/l reboot"); 
+    }
 
-            if(str.equals("Light\r\n")||str.equals("l\r\n")||str.equals("light\r\n")){
+    if(str.equals("Light\r\n")||str.equals("l\r\n")||str.equals("light\r\n")){
 
-                ESP_BT.print("Please write r,g,b,w, one by one. (0-255)");
+        ESP_BT.print("Please write r,g,b,w, one by one. (0-255)");
         int val[3];
 
-        for(int i=0; i< 6; i++){
+        for(int i=0; i < 4; i++){
 
         while (!ESP_BT.available())
         {
@@ -139,6 +139,13 @@ void BLE( void * parameter)
             i--;
             continue;
         }
+        if(val[i]>255){
+            val[i]=255;
+        }
+        if(val[i]<0){
+            val[i]=0;
+        }
+
         }
 
         briR = val[0];
