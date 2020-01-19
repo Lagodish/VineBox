@@ -14,19 +14,24 @@ void IRAM_ATTR resetModule() {
 void Light( void * parameter )
 {
         Serial.println("Light");
-        
-    int brightness = 0;    // how bright the LED is
-    int fadeAmount = 1 ;    // how many points to fade the LED by
+        /*
+           ledcAttachPin(GP3, 0);
+   ledcAttachPin(R, 1);
+   ledcAttachPin(G, 2);
+   ledcAttachPin(B, 3);
+   ledcAttachPin(W, 4);
+        */
 
     while(1){
 
-        ledcWrite(3, brightness);
-        ledcWrite(1, brightness);
-        ledcWrite(2, brightness);
-        ledcWrite(4, brightness);
-  brightness = brightness + fadeAmount; 
-  if (brightness <= 0 || brightness >= 150) {
-    fadeAmount = -fadeAmount;
+        ledcWrite(3, briB);
+        ledcWrite(1, briR);
+        ledcWrite(2, briG);
+        ledcWrite(4, briW);
+
+  briW = briW + briW; 
+  if (briW <= 10 || briW >= 150) {
+    briW = -briW;
   }
 
  vTaskDelay(20);    
@@ -175,6 +180,7 @@ void BLE( void * parameter)
         if (! rtc.begin()) {
     ESP_BT.println("Couldn't find RTC");
     err_flag = true;
+    err_str += "RTC, ";
      }
      else{
         ESP_BT.print("Please write h,m,s,y,m,d one by one");
@@ -283,18 +289,19 @@ void RTC( void * parameter)
     if (! rtc.begin()) {
     Serial.println("Couldn't find RTC");
     err_flag = true;
+    err_str += "RTC, ";
     vTaskDelete( NULL );
   }
- 
-//  if (rtc.lostPower()) {
-  //  Serial.println("RTC lost power, lets set the time!");
-    // following line sets the RTC to the date &amp; time this sketch was compiled
-   // rtc.adjust(DateTime(F(__DATE__), F(__TIME__)));
-    // This line sets the RTC with an explicit date &amp; time, for example to set
-    // January 21, 2014 at 3am you would call:
-    // rtc.adjust(DateTime(2020, 1, 15, 0, 37, 0));
- // }
-
+ /*
+  if (rtc.lostPower()) {
+   Serial.println("RTC lost power, lets set the time!");
+   //  following line sets the RTC to the date &amp; time this sketch was compiled
+    rtc.adjust(DateTime(F(__DATE__), F(__TIME__)));
+   //  This line sets the RTC with an explicit date &amp; time, for example to set
+ //    January 21, 2014 at 3am you would call:
+     rtc.adjust(DateTime(2020, 1, 15, 0, 37, 0));
+  }
+*/
     while(1){
     DateTime now = rtc.now();
     
@@ -302,6 +309,14 @@ void RTC( void * parameter)
     min_rtc = now.minute();
     sec_rtc = now.second();
 
+    if(h_rtc>60){
+
+         Serial.println("RTC ERR, lets set the time!");
+         err_flag = true;
+         err_str += "RTC, ";
+
+    }
+    else{
     Serial.print(now.year(), DEC);
     Serial.print('/');
     Serial.print(now.month(), DEC);
@@ -316,6 +331,7 @@ void RTC( void * parameter)
     Serial.print(':');
     Serial.print(now.second(), DEC);
     Serial.println();
+    }
     vTaskDelay(10000);
         
     }
@@ -368,8 +384,6 @@ void Static( void * parameter)
 void led( void * parameter)
 {
     Serial.println("led");
-    int brightness = 0;    // how bright the LED is
-    int fadeAmount = 1;    // how many points to fade the LED by
 
     while(1){
 
