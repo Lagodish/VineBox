@@ -109,13 +109,11 @@ void BLE( void * parameter)
     BluetoothSerial ESP_BT; //Object for Bluetooth
     ESP_BT.begin("VineBox"); //Name of your Bluetooth Signal
     ESP_BT.println("BLE works!");
-    while(1){
+    while(1){ 
 
-        
-
-        if (ESP_BT.available()) {
-            String str = ESP_BT.readString();
-            Serial.print(str);
+    if (ESP_BT.available()) {
+        String str = ESP_BT.readString();
+        Serial.print(str);
             
     if(str.equals("help\r\n")||str.equals("h\r\n")||str.equals("Help\r\n")){
         ESP_BT.println("Available commands help/h, set/s, flags/f, time, temp/t, light/l reboot"); 
@@ -156,45 +154,45 @@ void BLE( void * parameter)
         ESP_BT.println("OK!"); 
     }
 
-            if(str.equals("temp\r\n")||str.equals("t\r\n")){
-                if(numberOfDevices==0){
-                    ESP_BT.print("No devices found!");
-                }
-                else{
-                for(int i=0;i<numberOfDevices; i++){
-      ESP_BT.print("Temp[");
-      ESP_BT.print(i);
-      ESP_BT.print("]: ");
-      ESP_BT.print(tempC[i]);
-      ESP_BT.print(" C");
-      ESP_BT.println("");
+    if(str.equals("temp\r\n")||str.equals("t\r\n")){
+        if(numberOfDevices==0){
+            ESP_BT.print("No devices found!");
+        }
+        else{
+            for(int i=0;i<numberOfDevices; i++)
+                {
+                ESP_BT.print("Temp[");
+                ESP_BT.print(i);
+                ESP_BT.print("]: ");
+                ESP_BT.print(tempC[i]);
+                ESP_BT.print(" C");
+                ESP_BT.println("");
                 }
     
-    }
-
             }
-          if(str.equals("flags\r\n")||str.equals("f\r\n")){
+            }
+    if(str.equals("flags\r\n")||str.equals("f\r\n")){
 
-           ESP_BT.print("Flags: err[");
-           ESP_BT.print(err_flag);
-            ESP_BT.print("],light[");
-            ESP_BT.print(light_flag);
-            ESP_BT.print("],heater[");
-            ESP_BT.print(heater_flag);
-            ESP_BT.print("],comp[");
-            ESP_BT.print(comp_flag);
-            ESP_BT.print("],rgb[");
-            ESP_BT.print(rgb_flag);
-            ESP_BT.print("],fan1[");
-            ESP_BT.print(fan1_flag);
-            ESP_BT.print("],fan2[");
-            ESP_BT.print(fan2_flag);
-            ESP_BT.print("],beeper[");
-            ESP_BT.print(beeper_flag);
-            ESP_BT.print("]");
-            ESP_BT.println("");
-
+        ESP_BT.print("Flags: err[");
+        ESP_BT.print(err_flag);
+        ESP_BT.print("],light[");
+        ESP_BT.print(light_flag);
+        ESP_BT.print("],heater[");
+        ESP_BT.print(heater_flag);
+        ESP_BT.print("],comp[");
+        ESP_BT.print(comp_flag);
+        ESP_BT.print("],rgb[");
+        ESP_BT.print(rgb_flag);
+        ESP_BT.print("],fan1[");
+        ESP_BT.print(fan1_flag);
+        ESP_BT.print("],fan2[");
+        ESP_BT.print(fan2_flag);
+        ESP_BT.print("],beeper[");
+        ESP_BT.print(beeper_flag);
+        ESP_BT.print("]");
+        ESP_BT.println("");
     }
+
     if(str.equals("time\r\n")||str.equals("Time\r\n"))
     {
         ESP_BT.print("Time: ");
@@ -205,44 +203,41 @@ void BLE( void * parameter)
         ESP_BT.print(sec_rtc);
         ESP_BT.println("");
     }
+
     if(str.equals("set\r\n")||str.equals("s\r\n"))
     {
-
-        if (! rtc.begin()) {
-    ESP_BT.println("Couldn't find RTC");
-    err_flag = true;
-    err_str += "RTC, ";
-     }
-     else{
-        ESP_BT.print("Please write h,m,s,y,m,d one by one");
-        int set[6];
-
-        for(int i=0; i< 6; i++){
-
-        while (!ESP_BT.available())
+        if (! rtc.begin()) 
         {
-         vTaskDelay(10);   
+            ESP_BT.println("Couldn't find RTC");
+            err_flag = true;
+            err_str += "RTC, ";
         }
+        else
+        {
+            ESP_BT.print("Please write h,m,s,y,m,d one by one");
+            int set[6];
+            for(int i=0; i< 6; i++){
+
+                while (!ESP_BT.available())
+                {
+                    vTaskDelay(10);   
+                }
                        
-        set[i]=ESP_BT.parseInt();
+            set[i]=ESP_BT.parseInt();
 
-        if(set[i]==0){
-            i--;
-            continue;
+            if(set[i]==0){
+                i--;
+                continue;
+            }
         }
-
-       // ESP_BT.println("next");
-
-        }
-
         
         ESP_BT.printf("Time: %d:%d:%d %d.%d.%d", set[0],set[1],set[2],set[3],set[4],set[5]);
         ESP_BT.println("Correct? Y/n");
         bool test = true;
         while (test)
         {           
-         if (ESP_BT.available())
-        {         
+            if (ESP_BT.available())
+           {         
          String str = ESP_BT.readString();
 
          if(str.equals("Y\r\n")||str.equals("y\r\n")){
@@ -261,15 +256,16 @@ void BLE( void * parameter)
         }              
      }       
     }
+
     if(str.equals("reboot\r\n")||str.equals("Reboot\r\n")){
             ESP_BT.println("Reboot!");
-            resetModule();
-        
+            vTaskDelay(500);
+            resetModule();        
     }
     
                                                                  
   }
-        vTaskDelay(1000);
+        vTaskDelay(300);
     }
     
     Serial.println("Ending BLE");
