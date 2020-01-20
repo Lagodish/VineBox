@@ -336,7 +336,7 @@ void RTC( void * parameter)
     min_rtc = now.minute();
     sec_rtc = now.second();
 
-    if(h_rtc>60){
+    if((h_rtc>59)||(min_rtc>59)||(sec_rtc>59)){
 
          Serial.println("RTC ERR, lets set the time!");
          err_flag = true;
@@ -396,7 +396,7 @@ void Static( void * parameter)
     while(1){
 
     if(err_flag){
-        err_delay = 2;
+        err_delay = 1;
     }
     else{
         err_delay = 6;

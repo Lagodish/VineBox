@@ -11,10 +11,10 @@ void setup() {
   Serial1.begin(9600); //Displayt  
   
   ledcSetup(0, 1000, 8);
-  ledcSetup(1, 1000, 8);
-  ledcSetup(2, 1000, 8);
-  ledcSetup(3, 1000, 8);
-  ledcSetup(4, 1000, 8);
+  ledcSetup(1, 10000, 8);
+  ledcSetup(2, 10000, 8);
+  ledcSetup(3, 10000, 8);
+  ledcSetup(4, 10000, 8);
 
   ledcAttachPin(GP3, 0);
   ledcAttachPin(R, 1);
