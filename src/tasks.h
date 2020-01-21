@@ -198,6 +198,10 @@ void BLE( void * parameter)
 
     if(str.equals("time\r\n")||str.equals("Time\r\n"))
     {
+        if((h_rtc>24)||(min_rtc>59)||(sec_rtc>59)||(d_rtc>33)||(m_rtc>13)){
+            ESP_BT.print("RTC Err!");
+        }
+        else{
         ESP_BT.print("Time: ");
         ESP_BT.print(h_rtc);
         ESP_BT.print(":");
@@ -205,6 +209,7 @@ void BLE( void * parameter)
         ESP_BT.print(":");
         ESP_BT.print(sec_rtc);
         ESP_BT.println("");
+        }
     }
 
     if(str.equals("set\r\n")||str.equals("s\r\n"))
@@ -343,7 +348,7 @@ void RTC( void * parameter)
     d_rtc = now.day();
     m_rtc = now.month();
 
-    if((h_rtc>59)||(min_rtc>59)||(sec_rtc>59)||(d_rtc>33)||(m_rtc>13)){
+    if((h_rtc>24)||(min_rtc>59)||(sec_rtc>59)||(d_rtc>33)||(m_rtc>13)){
 
          Serial.println("RTC ERR, lets set the time!");
          err_flag = true;
@@ -351,6 +356,8 @@ void RTC( void * parameter)
 
     }
     else{
+    err_flag = false;
+    /*
     Serial.print(now.year(), DEC);
     Serial.print('/');
     Serial.print(m_rtc, DEC);
@@ -364,9 +371,9 @@ void RTC( void * parameter)
     Serial.print(now.minute(), DEC);
     Serial.print(':');
     Serial.print(now.second(), DEC);
-    Serial.println();
+    Serial.println();*/
     }
-    vTaskDelay(10000);
+    vTaskDelay(900);
         
     }
 
