@@ -107,6 +107,9 @@ void BLE( void * parameter)
     
 
     BluetoothSerial ESP_BT; //Object for Bluetooth
+    //ESP_BT.esp_ble_power_type_t(9);
+    //ESP_BT.esp_power_level_t(7);
+  //  ESP_BT.esp_ble_tx_power_set(ESP_BLE_PWR_TYPE_ADV, ESP_PWR_LVL_P9);
     ESP_BT.begin("VineBox"); //Name of your Bluetooth Signal
     ESP_BT.println("BLE works!");
     while(1){ 
@@ -125,7 +128,7 @@ void BLE( void * parameter)
         int val[3];
 
         for(int i=0; i < 4; i++){
-
+        val[i]=0;
         while (!ESP_BT.available())
         {
          vTaskDelay(10);   
@@ -335,8 +338,10 @@ void RTC( void * parameter)
     h_rtc = now.hour();
     min_rtc = now.minute();
     sec_rtc = now.second();
+    d_rtc = now.day();
+    m_rtc = now.month();
 
-    if((h_rtc>59)||(min_rtc>59)||(sec_rtc>59)){
+    if((h_rtc>59)||(min_rtc>59)||(sec_rtc>59)||(d_rtc>33)||(m_rtc>13)){
 
          Serial.println("RTC ERR, lets set the time!");
          err_flag = true;
@@ -346,9 +351,9 @@ void RTC( void * parameter)
     else{
     Serial.print(now.year(), DEC);
     Serial.print('/');
-    Serial.print(now.month(), DEC);
+    Serial.print(m_rtc, DEC);
     Serial.print('/');
-    Serial.print(now.day(), DEC);
+    Serial.print(d_rtc, DEC);
     Serial.print(" (");
     Serial.print(daysOfTheWeek[now.dayOfTheWeek()]);
     Serial.print(") ");
