@@ -125,7 +125,7 @@ void BLE( void * parameter)
     if(str.equals("Light\r\n")||str.equals("l\r\n")||str.equals("light\r\n")){
 
         ESP_BT.print("Please write r,g,b,w, one by one. (0-255)");
-        int val[3];
+        int val[4];
 
         for(int i=0; i < 4; i++){
         val[i]=0;
@@ -199,8 +199,21 @@ void BLE( void * parameter)
         ESP_BT.println("");
     }
 
-    if(str.equals("time\r\n")||str.equals("Time\r\n"))
+    if(str.equals("time\r\n")||str.equals("Time\r\n")||str.equals("Time -i\r\n")||str.equals("time -i\r\n"))
     {
+        if(str.equals("Time -i\r\n")||str.equals("time -i\r\n")){
+            
+        ESP_BT.print("Time: ");
+        ESP_BT.print(h_rtc);
+        ESP_BT.print(":");
+        ESP_BT.print(min_rtc);
+        ESP_BT.print(":");
+        ESP_BT.print(sec_rtc);
+        ESP_BT.println("");
+
+        }
+        else{
+        //str.equalsIgnoreCase("*-r*")''
         if((h_rtc>24)||(min_rtc>59)||(sec_rtc>59)||(d_rtc>33)||(m_rtc>12)){
             ESP_BT.print("RTC Err!");//(h_rtc>24)||(min_rtc>59)||(sec_rtc>59)||(d_rtc>33)||(m_rtc>13)
         }
@@ -213,6 +226,12 @@ void BLE( void * parameter)
         ESP_BT.print(sec_rtc);
         ESP_BT.println("");
         }
+        }
+    }
+
+    if(str.equals("TimeSet\r\n")||str.equals("ts\r\n"))
+    {
+        set_t = true;
     }
 
     if(str.equals("set\r\n")||str.equals("s\r\n"))
@@ -339,7 +358,10 @@ void RTC( void * parameter)
   //  Rtc.SetDateTime(compiled);
     while(1){
  
-    
+    if(set_t){
+            Rtc.SetDateTime(compiled);
+            set_t = false;
+        }
 
 
     if(!Rtc.IsDateTimeValid()){

@@ -28,6 +28,7 @@ int sec_rtc = 0;
 int d_rtc = 0;
 int m_rtc = 0;
 int y_rtc = 0;
+bool set_t = false;
 double temp_rtc = 0;
 
 //WDT
