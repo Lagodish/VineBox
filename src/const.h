@@ -27,6 +27,8 @@ int min_rtc = 0;
 int sec_rtc = 0;
 int d_rtc = 0;
 int m_rtc = 0;
+int y_rtc = 0;
+double temp_rtc = 0;
 
 //WDT
 const int wdtTimeout = 3000;  //time in ms to trigger the watchdog

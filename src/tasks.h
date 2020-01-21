@@ -2,9 +2,9 @@
 #include <OneWire.h>
 #include <DallasTemperature.h>
 #include "BluetoothSerial.h"
-#include "RTClib.h"
-
-RTC_DS3231 rtc; 
+#include <Wire.h> 
+#include <RtcDS3231.h>
+RtcDS3231<TwoWire> Rtc(Wire);
 
 void IRAM_ATTR resetModule() {
  // ets_printf("reboot\n");
@@ -96,10 +96,10 @@ void DisplayOut( void * parameter)
 }
 
 void set_time(int h,int min,int s,int y,int m, int d){
-        rtc.adjust(DateTime(F(__DATE__), F(__TIME__)));
+      //  rtc.adjust(DateTime(F(__DATE__), F(__TIME__)));
     // This line sets the RTC with an explicit date &amp; time, for example to set
     // January 21, 2014 at 3am you would call:
-         rtc.adjust(DateTime(y, m, d, h, min, s));
+      //   rtc.adjust(DateTime(y, m, d, h, min, s));
 }
 
 void BLE( void * parameter)
@@ -170,6 +170,9 @@ void BLE( void * parameter)
                 ESP_BT.print(tempC[i]);
                 ESP_BT.print(" C");
                 ESP_BT.println("");
+                if(Rtc.IsDateTimeValid()){
+                    ESP_BT.printf("Temp[RTC]: %.2f C", temp_rtc);
+                }
                 }
     
             }
@@ -198,8 +201,8 @@ void BLE( void * parameter)
 
     if(str.equals("time\r\n")||str.equals("Time\r\n"))
     {
-        if((h_rtc>24)||(min_rtc>59)||(sec_rtc>59)||(d_rtc>33)||(m_rtc>13)){
-            ESP_BT.print("RTC Err!");
+        if((h_rtc>24)||(min_rtc>59)||(sec_rtc>59)||(d_rtc>33)||(m_rtc>12)){
+            ESP_BT.print("RTC Err!");//(h_rtc>24)||(min_rtc>59)||(sec_rtc>59)||(d_rtc>33)||(m_rtc>13)
         }
         else{
         ESP_BT.print("Time: ");
@@ -214,7 +217,7 @@ void BLE( void * parameter)
 
     if(str.equals("set\r\n")||str.equals("s\r\n"))
     {
-        if (! rtc.begin()) 
+        if (!Rtc.IsDateTimeValid()) 
         {
             ESP_BT.println("Couldn't find RTC");
             err_flag = true;
@@ -321,34 +324,25 @@ void HeaterCtrl( void * parameter)
 void RTC( void * parameter)
 {
     Serial.println("RTC");
-    char daysOfTheWeek[7][12] = {"Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"};
-    
-    if (! rtc.begin()) {
-    Serial.println("Couldn't find RTC");
-    err_flag = true;
-    err_str += "RTC, ";
-    vTaskDelete( NULL );
-  }
- /*
-  if (rtc.lostPower()) {
-   Serial.println("RTC lost power, lets set the time!");
-   //  following line sets the RTC to the date &amp; time this sketch was compiled
-    rtc.adjust(DateTime(F(__DATE__), F(__TIME__)));
-   //  This line sets the RTC with an explicit date &amp; time, for example to set
- //    January 21, 2014 at 3am you would call:
-     rtc.adjust(DateTime(2020, 1, 15, 0, 37, 0));
-  }
-*/
-    while(1){
-    DateTime now = rtc.now();
-    
-    h_rtc = now.hour();
-    min_rtc = now.minute();
-    sec_rtc = now.second();
-    d_rtc = now.day();
-    m_rtc = now.month();
+     Wire.begin(21, 22); // 21 & 22 are default on ESP32    
+     Rtc.Begin();
+    Serial.println();
+        if (!Rtc.GetIsRunning())
+    {
+        Serial.println("RTC was not actively running, starting now");
+        Rtc.SetIsRunning(true);
+    }
 
-    if((h_rtc>24)||(min_rtc>59)||(sec_rtc>59)||(d_rtc>33)||(m_rtc>13)){
+        Rtc.Enable32kHzPin(false);
+    Rtc.SetSquareWavePin(DS3231SquareWavePin_ModeNone);
+    RtcDateTime compiled = RtcDateTime(__DATE__, __TIME__);
+  //  Rtc.SetDateTime(compiled);
+    while(1){
+ 
+    
+
+
+    if(!Rtc.IsDateTimeValid()){
 
          Serial.println("RTC ERR, lets set the time!");
          err_flag = true;
@@ -356,22 +350,20 @@ void RTC( void * parameter)
 
     }
     else{
+
+    RtcDateTime now = Rtc.GetDateTime();
+	RtcTemperature temp = Rtc.GetTemperature();
+
+
+    h_rtc = now.Hour();
+    min_rtc = now.Minute();
+    sec_rtc = now.Second();
+    d_rtc = now.Day();
+    m_rtc = now.Month();
+    y_rtc = now.Year();
+    temp_rtc = double( temp.AsFloatDegC() );
+
     err_flag = false;
-    /*
-    Serial.print(now.year(), DEC);
-    Serial.print('/');
-    Serial.print(m_rtc, DEC);
-    Serial.print('/');
-    Serial.print(d_rtc, DEC);
-    Serial.print(" (");
-    Serial.print(daysOfTheWeek[now.dayOfTheWeek()]);
-    Serial.print(") ");
-    Serial.print(now.hour(), DEC);
-    Serial.print(':');
-    Serial.print(now.minute(), DEC);
-    Serial.print(':');
-    Serial.print(now.second(), DEC);
-    Serial.println();*/
     }
     vTaskDelay(900);
         
