@@ -6,6 +6,13 @@
 #include <SPI.h>
 #include <Wire.h>
 #include <U8g2lib.h>
+#include <WiFi.h>
+#include <WiFiClient.h>
+#include <WebServer.h>
+#include <ESPmDNS.h>
+#include <Update.h>
+
+WebServer server(80);
 
 U8G2_SSD1306_128X64_NONAME_1_HW_I2C u8g2(U8G2_R0, /* reset=*/ U8X8_PIN_NONE);
 
@@ -138,10 +145,17 @@ void OLED( void * parameter)
   char c;
   while (Serial.available() > 0) {
     c = Serial.read();			// read from Serial Monitor
+    if(i2c){
+        while(i2c){
+            vTaskDelay(2);
+        }
+    }
+    i2c = true;
     u8g2log.print(c);               // print to display
+    i2c = false;
   //  Serial.print(c);                // and print back to monitor
   }
-        Serial1.println("Test olED");
+       // Serial1.println("Test olED");
         i2c = false;
         vTaskDelay(100);
     }
@@ -155,24 +169,29 @@ void set_time(int h,int min,int s,int y,int m, int d){
     // This line sets the RTC with an explicit date &amp; time, for example to set
     // January 21, 2014 at 3am you would call:
       //   rtc.adjust(DateTime(y, m, d, h, min, s));
+//TODO  
+
 }
 
 void BLE( void * parameter)
 {
     
+    uint64_t chipid; 
+    chipid=ESP.getEfuseMac();
+    Serial.printf("ESP32 Chip ID = %04X",(uint16_t)(chipid>>32));
 
     BluetoothSerial ESP_BT; //Object for Bluetooth
     //ESP_BT.esp_ble_power_type_t(9);
     //ESP_BT.esp_power_level_t(7);
   //  ESP_BT.esp_ble_tx_power_set(ESP_BLE_PWR_TYPE_ADV, ESP_PWR_LVL_P9);
-    ESP_BT.begin("VineBox"); //Name of your Bluetooth Signal
+    ESP_BT.begin("VineBox_" + String((uint16_t)(chipid>>32))); //Name of your Bluetooth Signal
     ESP_BT.println("BLE works!");
     while(1){ 
 
     if (ESP_BT.available()) {
         String str = ESP_BT.readString();
         Serial.print(str);
-         u8g2log.print(str);
+        u8g2log.print(str);
             
     if(str.equals("help\r\n")||str.equals("h\r\n")||str.equals("Help\r\n")){
         ESP_BT.println("Available commands help/h, set/s, flags/f, time, temp/t, light/l reboot"); 
@@ -404,6 +423,7 @@ void RTC( void * parameter)
             vTaskDelay(10);
         }
     }
+    int counter = 0;
     i2c = true;
       
      Rtc.Begin();
@@ -433,10 +453,13 @@ void RTC( void * parameter)
 
 
     if(!Rtc.IsDateTimeValid()){
-
-         Serial.println("RTC ERR, lets set the time!");
+            if(counter==0)
+                Serial.println("RTC ERR, lets set the time!");
+            if(counter>20)
+                counter = 0;
+            counter++;
          err_flag = true;
-         err_str += "RTC, ";
+       //  err_str += "RTC, ";
 
     }
     else{
@@ -529,5 +552,76 @@ void led( void * parameter)
     }
 
     Serial.println("Ending led");
+    vTaskDelete( NULL );
+}
+
+
+void ServerOTA( void * parameter)
+{
+    Serial.println("ServerOTA");
+WiFi.begin(ssid, password);
+  Serial.println("");
+
+  // Wait for connection
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(500);
+    Serial.print(".");
+  }
+  Serial.println("");
+  Serial.print("Connected to ");
+  Serial.println(ssid);
+  Serial.print("IP address: ");
+  Serial.println(WiFi.localIP());
+
+  /*use mdns for host name resolution*/
+  if (!MDNS.begin(host)) { //http://esp32.local
+    Serial.println("Error setting up MDNS responder!");
+    while (1) {
+      vTaskDelay(1000); 
+    }
+  }
+  Serial.println("mDNS responder started");
+  /*return index page which is stored in serverIndex */
+  server.on("/", HTTP_GET, []() {
+    server.sendHeader("Connection", "close");
+    server.send(200, "text/html", loginIndex);
+  });
+  server.on("/serverIndex", HTTP_GET, []() {
+    server.sendHeader("Connection", "close");
+    server.send(200, "text/html", serverIndex);
+  });
+  /*handling uploading firmware file */
+  server.on("/update", HTTP_POST, []() {
+    server.sendHeader("Connection", "close");
+    server.send(200, "text/plain", (Update.hasError()) ? "FAIL" : "OK");
+    ESP.restart();
+  }, []() {
+    HTTPUpload& upload = server.upload();
+    if (upload.status == UPLOAD_FILE_START) {
+      Serial.printf("Update: %s\n", upload.filename.c_str());
+      if (!Update.begin(UPDATE_SIZE_UNKNOWN)) { //start with max available size
+        Update.printError(Serial);
+      }
+    } else if (upload.status == UPLOAD_FILE_WRITE) {
+      /* flashing firmware to ESP*/
+      if (Update.write(upload.buf, upload.currentSize) != upload.currentSize) {
+        Update.printError(Serial);
+      }
+    } else if (upload.status == UPLOAD_FILE_END) {
+      if (Update.end(true)) { //true to set the size to the current progress
+        Serial.printf("Update Success: %u\nRebooting...\n", upload.totalSize);
+      } else {
+        Update.printError(Serial);
+      }
+    }
+  });
+  server.begin();
+    while(1){
+server.handleClient();
+ vTaskDelay(10);    
+
+    }
+
+    Serial.println("Ending ServerOTA");
     vTaskDelete( NULL );
 }

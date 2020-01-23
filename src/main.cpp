@@ -5,6 +5,7 @@
 
 
 
+
 void setup() {
   // put your setup code here, to run once:
   Serial.begin(9600); //Uart
@@ -38,7 +39,14 @@ void setup() {
 
   delay(100);
  
-   
+     xTaskCreate(
+                    ServerOTA,          
+                    "ServerOTA",        
+                    8000,            
+                    NULL,             
+                    1,               
+                    NULL);
+
   xTaskCreate(
                     TempRead,          
                     "TempRead",        

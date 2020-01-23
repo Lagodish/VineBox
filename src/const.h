@@ -48,6 +48,7 @@ uint16_t intTriggerCount=0;
 //WIFI
 const char* ssid = "Psin(a)";
 const char* password = "Hey!28R0om!";
+const char* host = "esp32";
 
 // Flags
 bool light_flag = true;
