@@ -41,7 +41,7 @@ bool i2c = false;
 
 
 //WDT
-const int wdtTimeout = 3000;  //time in ms to trigger the watchdog
+const int wdtTimeout = 5000;  //time in ms to trigger the watchdog
 hw_timer_t *timer = NULL;
 
 //Interrupt
@@ -66,5 +66,6 @@ bool fan2_flag = false;
 bool beeper_flag = true;
 bool err_flag = false;
 String err_str = "";
-int err_delay = 6;
+int def_time = 6;
+int err_delay = def_time;
 //err_str += "RTC, ";

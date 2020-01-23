@@ -197,8 +197,43 @@ void BLE( void * parameter)
         u8g2log.print(str);
             
     if(str.equals("help\r\n")||str.equals("h\r\n")||str.equals("Help\r\n")){
-        ESP_BT.println("Available commands help/h, set/s, flags/f, time, temp/t, light/l,ota -on/off reboot"); 
+        ESP_BT.println("Available commands help/h (-a), set/s, flags/f, time, temp/t, light/l,ota -on/off reboot"); 
     }
+    if(str.equals("help -a\r\n")||str.equals("h -a\r\n")||str.equals("Help -a\r\n")){
+        ESP_BT.println("More cmnd: err_flag "); 
+    }
+
+    if(str.equals("err_flag\r\n")){
+        ESP_BT.print("Please write def. delay time (ms). (1-100)");
+        int val[1];
+
+        for(int i=0; i < 1; i++){
+        val[i]=0;
+        while (!ESP_BT.available())
+        {
+         vTaskDelay(10);   
+        }
+                       
+        val[i]=ESP_BT.parseInt();
+
+        if(val[i]==0){
+            i--;
+            continue;
+        }
+        if(val[i]>100){
+            val[i]=100;
+        }
+        if(val[i]<0){
+            val[i]=1;
+        }
+
+
+        }
+
+        def_time=val[0];
+        
+        }
+    
 
     if(str.equals("Ota -on\r\n")||str.equals("ota -on\r\n")||str.equals("OTA -on\r\n")||str.equals("OTA\r\n")){
         if (EEPROM.begin(EEPROM_SIZE))
@@ -467,8 +502,8 @@ void RTC( void * parameter)
 
         Rtc.Enable32kHzPin(false);
     Rtc.SetSquareWavePin(DS3231SquareWavePin_ModeNone);
-    RtcDateTime compiled = RtcDateTime(__DATE__, __TIME__);
 
+    RtcDateTime compiled = RtcDateTime(__DATE__, __TIME__);
     if(ts){
         set_t = true;
         EEPROM.write(2,false);
@@ -556,7 +591,7 @@ void Static( void * parameter)
         err_delay = 1;
     }
     else{
-        err_delay = 6;
+        err_delay = def_time;
     }
 
     if(old_Value != intTriggerCount){
