@@ -50,7 +50,7 @@ void setup() {
   xTaskCreate(
                     OLED,          
                     "OLED",        
-                    20000,            
+                    10000,            
                     NULL,             
                     1,               
                     NULL); 

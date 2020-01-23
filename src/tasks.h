@@ -5,15 +5,14 @@
 #include <RtcDS3231.h>
 #include <SPI.h>
 #include <Wire.h>
-#include <Adafruit_GFX.h>
-#include <Adafruit_SSD1306.h>
+#include <U8g2lib.h>
 
+U8G2_SSD1306_128X64_NONAME_1_HW_I2C u8g2(U8G2_R0, /* reset=*/ U8X8_PIN_NONE);
 
-#define SCREEN_WIDTH 128 // OLED display width, in pixels
-#define SCREEN_HEIGHT 64 // OLED display height, in pixels
-
-// Declaration for an SSD1306 display connected to I2C (SDA, SCL pins)
-Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, -1);
+#define U8LOG_WIDTH 20
+#define U8LOG_HEIGHT 8
+uint8_t u8log_buffer[U8LOG_WIDTH*U8LOG_HEIGHT];
+U8G2LOG u8g2log;
 
 RtcDS3231<TwoWire> Rtc(Wire);
 
@@ -106,67 +105,6 @@ void DisplayOut( void * parameter)
     vTaskDelete( NULL );
 }
 
-void testdrawline() {
-  int16_t i;
-
-  display.clearDisplay(); // Clear display buffer
-
-  for(i=0; i<display.width(); i+=4) {
-    display.drawLine(0, 0, i, display.height()-1, SSD1306_WHITE);
-    display.display(); // Update screen with each newly-drawn line
-    vTaskDelay(1);
-  }
-  for(i=0; i<display.height(); i+=4) {
-    display.drawLine(0, 0, display.width()-1, i, SSD1306_WHITE);
-    display.display();
-    vTaskDelay(1);
-  }
-  vTaskDelay(250);
-
-  display.clearDisplay();
-
-  for(i=0; i<display.width(); i+=4) {
-    display.drawLine(0, display.height()-1, i, 0, SSD1306_WHITE);
-    display.display();
-    vTaskDelay(1);
-  }
-  for(i=display.height()-1; i>=0; i-=4) {
-    display.drawLine(0, display.height()-1, display.width()-1, i, SSD1306_WHITE);
-    display.display();
-    vTaskDelay(1);
-  }
-  vTaskDelay(250);
-
-  display.clearDisplay();
-
-  for(i=display.width()-1; i>=0; i-=4) {
-    display.drawLine(display.width()-1, display.height()-1, i, 0, SSD1306_WHITE);
-    display.display();
-    vTaskDelay(1);
-  }
-  for(i=display.height()-1; i>=0; i-=4) {
-    display.drawLine(display.width()-1, display.height()-1, 0, i, SSD1306_WHITE);
-    display.display();
-    vTaskDelay(1);
-  }
-  vTaskDelay(250);
-
-  display.clearDisplay();
-
-  for(i=0; i<display.height(); i+=4) {
-    display.drawLine(display.width()-1, 0, 0, i, SSD1306_WHITE);
-    display.display();
-    vTaskDelay(1);
-  }
-  for(i=0; i<display.width(); i+=4) {
-    display.drawLine(display.width()-1, 0, i, display.height()-1, SSD1306_WHITE);
-    display.display();
-    vTaskDelay(1);
-  }
-
-  vTaskDelay(2000); // Pause for 2 seconds
-}
-
 
 void OLED( void * parameter)
 {
@@ -177,51 +115,34 @@ void OLED( void * parameter)
         }
     }
     i2c = true;
-    //display.begin()
 
-        while(!display.begin(SSD1306_SWITCHCAPVCC, 0x3C)) { // Address 0x3D for 128x64
-    //Serial.println(F("SSD1306 allocation failed"));
-    err_flag = true;
-    vTaskDelay(100);
-  }
-err_flag = false;
+      u8g2.begin();  
+      u8g2.clear();
+  u8g2.setFont(u8g2_font_synchronizer_nbp_tf);	// set the font for the terminal window
+  u8g2log.begin(u8g2, U8LOG_WIDTH, U8LOG_HEIGHT, u8log_buffer);
+  u8g2log.setLineHeightOffset(0);	// set extra space between lines in pixel, this can be negative
+  u8g2log.setRedrawMode(1);		// 0: Update screen with newline, 1: Update screen for every char  
 
-    int br=0;
+    i2c = false;
+   
     while(1){
-
-        while(!display.begin(SSD1306_SWITCHCAPVCC, 0x3C)) { // Address 0x3D for 128x64
-    //Serial.println(F("SSD1306 allocation failed"));
-    err_flag = true;
-    vTaskDelay(100);
-  }
-err_flag = false;
-
-
-       if(i2c){
+     //   Serial.println("OLED");
+    if(i2c){
         while(i2c){
             vTaskDelay(10);
         }
     }
     i2c = true;
-    br++;
-    if(br>256){
-        br=0;
-    }
-     //   display.ssd1306_command(SSD1306_SETCONTRAST);                   // 0x81
-   // display.ssd1306_command(br);
 
-  display.clearDisplay();
 
-  display.setTextSize(1);
-  display.setTextColor(WHITE);
-  display.setCursor(0, 10);
-  // Display static text
-  display.println("Hello, world! "+String(br));
-  display.display(); 
-
-    i2c = false;
-   //     testdrawline();
+  char c;
+  while (Serial.available() > 0) {
+    c = Serial.read();			// read from Serial Monitor
+    u8g2log.print(c);               // print to display
+  //  Serial.print(c);                // and print back to monitor
+  }
         Serial1.println("Test olED");
+        i2c = false;
         vTaskDelay(100);
     }
 
@@ -251,6 +172,7 @@ void BLE( void * parameter)
     if (ESP_BT.available()) {
         String str = ESP_BT.readString();
         Serial.print(str);
+         u8g2log.print(str);
             
     if(str.equals("help\r\n")||str.equals("h\r\n")||str.equals("Help\r\n")){
         ESP_BT.println("Available commands help/h, set/s, flags/f, time, temp/t, light/l reboot"); 
