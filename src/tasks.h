@@ -468,6 +468,12 @@ void RTC( void * parameter)
         Rtc.Enable32kHzPin(false);
     Rtc.SetSquareWavePin(DS3231SquareWavePin_ModeNone);
     RtcDateTime compiled = RtcDateTime(__DATE__, __TIME__);
+
+    if(ts){
+        set_t = true;
+        EEPROM.write(2,false);
+        EEPROM.commit();
+    }
     i2c = false;
   //  Rtc.SetDateTime(compiled);
     while(1){
@@ -625,10 +631,11 @@ WiFi.mode(WIFI_STA);
     })
     .onEnd([]() {
     
-  
+            set_t = true;
             EEPROM.write(addr,false);
+            EEPROM.write(2,true);
             EEPROM.commit();
-
+//vTaskDelay(2000); 
  ///       
       Serial.println("\nEnd");
     })

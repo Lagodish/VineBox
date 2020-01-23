@@ -16,6 +16,7 @@ int briW = 0;
 
 //boot
 bool ota = false;
+bool ts = false;
 
 //DS18B20 setup
 const int oneWireBus = DS18B20;

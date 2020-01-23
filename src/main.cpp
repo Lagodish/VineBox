@@ -15,6 +15,7 @@ if (EEPROM.begin(EEPROM_SIZE))
   {
   //  EEPROM.write(addr, false);
     ota = EEPROM.read(addr);
+    ts = EEPROM.read(2);
   }
 
   
