@@ -9,7 +9,8 @@ void setup() {
   // put your setup code here, to run once:
   Serial.begin(9600); //Uart
   Serial1.begin(9600); //Displayt  
-  
+  //Wire.begin(21, 22, 400000); // 21 & 22 are default on ESP32   
+
   ledcSetup(0, 1000, 8);
   ledcSetup(1, 10000, 8);
   ledcSetup(2, 10000, 8);
@@ -45,6 +46,14 @@ void setup() {
                     NULL,             
                     1,               
                     NULL);           
+  
+  xTaskCreate(
+                    OLED,          
+                    "OLED",        
+                    20000,            
+                    NULL,             
+                    1,               
+                    NULL); 
   
  
   xTaskCreate(

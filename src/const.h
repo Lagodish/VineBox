@@ -31,6 +31,13 @@ int y_rtc = 0;
 bool set_t = false;
 double temp_rtc = 0;
 
+//oled
+//#define SCREEN_WIDTH 128 // OLED display width, in pixels
+//#define SCREEN_HEIGHT 64 // OLED display height, in pixels
+bool i2c = false;
+#define OLED_RESET     -1 // Reset pin # (or -1 if sharing Arduino reset pin)
+
+
 //WDT
 const int wdtTimeout = 3000;  //time in ms to trigger the watchdog
 hw_timer_t *timer = NULL;
