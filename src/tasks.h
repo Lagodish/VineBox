@@ -7,12 +7,10 @@
 #include <Wire.h>
 #include <U8g2lib.h>
 #include <WiFi.h>
-#include <WiFiClient.h>
-#include <WebServer.h>
 #include <ESPmDNS.h>
-#include <Update.h>
-
-WebServer server(80);
+#include <WiFiUdp.h>
+#include <ArduinoOTA.h>
+#include "EEPROM.h"
 
 U8G2_SSD1306_128X64_NONAME_1_HW_I2C u8g2(U8G2_R0, /* reset=*/ U8X8_PIN_NONE);
 
@@ -116,11 +114,11 @@ void DisplayOut( void * parameter)
 void OLED( void * parameter)
 {
     Serial.println("OLED");
-    if(i2c){
-        while(i2c){
-            vTaskDelay(10);
-        }
+    
+    while(i2c){
+        vTaskDelay(10);
     }
+    
     i2c = true;
 
       u8g2.begin();  
@@ -175,7 +173,8 @@ void set_time(int h,int min,int s,int y,int m, int d){
 
 void BLE( void * parameter)
 {
-    
+  
+
     uint64_t chipid; 
     chipid=ESP.getEfuseMac();
     Serial.printf("ESP32 Chip ID = %04X",(uint16_t)(chipid>>32));
@@ -186,7 +185,11 @@ void BLE( void * parameter)
   //  ESP_BT.esp_ble_tx_power_set(ESP_BLE_PWR_TYPE_ADV, ESP_PWR_LVL_P9);
     ESP_BT.begin("VineBox_" + String((uint16_t)(chipid>>32))); //Name of your Bluetooth Signal
     ESP_BT.println("BLE works!");
+
+
     while(1){ 
+
+
 
     if (ESP_BT.available()) {
         String str = ESP_BT.readString();
@@ -194,7 +197,35 @@ void BLE( void * parameter)
         u8g2log.print(str);
             
     if(str.equals("help\r\n")||str.equals("h\r\n")||str.equals("Help\r\n")){
-        ESP_BT.println("Available commands help/h, set/s, flags/f, time, temp/t, light/l reboot"); 
+        ESP_BT.println("Available commands help/h, set/s, flags/f, time, temp/t, light/l,ota -on/off reboot"); 
+    }
+
+    if(str.equals("Ota -on\r\n")||str.equals("ota -on\r\n")||str.equals("OTA -on\r\n")||str.equals("OTA\r\n")){
+        if (EEPROM.begin(EEPROM_SIZE))
+            {
+            EEPROM.write(addr,true);
+            EEPROM.commit();
+            ESP_BT.println("OTA ON! Reboot..."); 
+            vTaskDelay(100);
+            resetModule();
+        }
+        else{
+            ESP_BT.println("EEPROM ERROR!"); 
+        }
+        
+    }
+
+        if(str.equals("Ota -off\r\n")||str.equals("ota -off\r\n")||str.equals("OTA -off\r\n")){
+        if (EEPROM.begin(EEPROM_SIZE))
+            {
+            EEPROM.write(addr,false);
+            EEPROM.commit();
+            ESP_BT.println("OTA OFF!"); 
+        }
+        else{
+            ESP_BT.println("EEPROM ERROR!"); 
+        }
+        
     }
 
     if(str.equals("Light\r\n")||str.equals("l\r\n")||str.equals("light\r\n")){
@@ -559,66 +590,72 @@ void led( void * parameter)
 void ServerOTA( void * parameter)
 {
     Serial.println("ServerOTA");
-WiFi.begin(ssid, password);
-  Serial.println("");
 
-  // Wait for connection
-  while (WiFi.status() != WL_CONNECTED) {
-    delay(500);
-    Serial.print(".");
-  }
-  Serial.println("");
-  Serial.print("Connected to ");
-  Serial.println(ssid);
+WiFi.mode(WIFI_STA);
+  WiFi.begin(ssid, password);
+    while (WiFi.status() != WL_CONNECTED) {
+        vTaskDelay(1000);
+        Serial.print(".");
+    }
+
+  // Port defaults to 3232
+   ArduinoOTA.setPort(3232);
+
+   // char* name = "VineBox_" + String((uint16_t)(chipid>>32));
+  // Hostname defaults to esp3232-[MAC]
+   ArduinoOTA.setHostname("VineBoxOTA");
+
+  // No authentication by default
+   ArduinoOTA.setPassword("VineBoxPass");
+
+  // Password can be set with it's md5 value as well
+  // MD5(admin) = 21232f297a57a5a743894a0e4a801fc3
+  // ArduinoOTA.setPasswordHash("21232f297a57a5a743894a0e4a801fc3");
+
+  ArduinoOTA
+    .onStart([]() {
+      String type;
+      if (ArduinoOTA.getCommand() == U_FLASH)
+        type = "sketch";
+      else // U_SPIFFS
+        type = "filesystem";
+
+      // NOTE: if updating SPIFFS this would be the place to unmount SPIFFS using SPIFFS.end()
+      Serial.println("Start updating " + type);
+    })
+    .onEnd([]() {
+    
+  
+            EEPROM.write(addr,false);
+            EEPROM.commit();
+
+ ///       
+      Serial.println("\nEnd");
+    })
+    .onProgress([](unsigned int progress, unsigned int total) {
+      Serial.printf("Progress: %u%%\r\n", (progress / (total / 100)));
+    })
+    .onError([](ota_error_t error) {
+      Serial.printf("Error[%u]: ", error);
+      if (error == OTA_AUTH_ERROR) Serial.println("Auth Failed");
+      else if (error == OTA_BEGIN_ERROR) Serial.println("Begin Failed");
+      else if (error == OTA_CONNECT_ERROR) Serial.println("Connect Failed");
+      else if (error == OTA_RECEIVE_ERROR) Serial.println("Receive Failed");
+      else if (error == OTA_END_ERROR) Serial.println("End Failed");
+    });
+
+  ArduinoOTA.begin();
+
+  Serial.println("Ready");
   Serial.print("IP address: ");
   Serial.println(WiFi.localIP());
 
-  /*use mdns for host name resolution*/
-  if (!MDNS.begin(host)) { //http://esp32.local
-    Serial.println("Error setting up MDNS responder!");
-    while (1) {
-      vTaskDelay(1000); 
-    }
-  }
-  Serial.println("mDNS responder started");
-  /*return index page which is stored in serverIndex */
-  server.on("/", HTTP_GET, []() {
-    server.sendHeader("Connection", "close");
-    server.send(200, "text/html", loginIndex);
-  });
-  server.on("/serverIndex", HTTP_GET, []() {
-    server.sendHeader("Connection", "close");
-    server.send(200, "text/html", serverIndex);
-  });
-  /*handling uploading firmware file */
-  server.on("/update", HTTP_POST, []() {
-    server.sendHeader("Connection", "close");
-    server.send(200, "text/plain", (Update.hasError()) ? "FAIL" : "OK");
-    ESP.restart();
-  }, []() {
-    HTTPUpload& upload = server.upload();
-    if (upload.status == UPLOAD_FILE_START) {
-      Serial.printf("Update: %s\n", upload.filename.c_str());
-      if (!Update.begin(UPDATE_SIZE_UNKNOWN)) { //start with max available size
-        Update.printError(Serial);
-      }
-    } else if (upload.status == UPLOAD_FILE_WRITE) {
-      /* flashing firmware to ESP*/
-      if (Update.write(upload.buf, upload.currentSize) != upload.currentSize) {
-        Update.printError(Serial);
-      }
-    } else if (upload.status == UPLOAD_FILE_END) {
-      if (Update.end(true)) { //true to set the size to the current progress
-        Serial.printf("Update Success: %u\nRebooting...\n", upload.totalSize);
-      } else {
-        Update.printError(Serial);
-      }
-    }
-  });
-  server.begin();
+
+
     while(1){
-server.handleClient();
- vTaskDelay(10);    
+
+    ArduinoOTA.handle();
+    vTaskDelay(100);    
 
     }
 

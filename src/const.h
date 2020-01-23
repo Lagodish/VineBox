@@ -14,7 +14,8 @@ int briG = 0;
 int briB = 0;
 int briW = 0;
 
-
+//boot
+bool ota = false;
 
 //DS18B20 setup
 const int oneWireBus = DS18B20;
@@ -49,6 +50,10 @@ uint16_t intTriggerCount=0;
 const char* ssid = "Psin(a)";
 const char* password = "Hey!28R0om!";
 const char* host = "esp32";
+
+//eeprom
+int addr = 0;
+#define EEPROM_SIZE 64
 
 // Flags
 bool light_flag = true;

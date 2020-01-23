@@ -4,13 +4,20 @@
 #include <tasks.h>
 
 
-
-
 void setup() {
   // put your setup code here, to run once:
+ // delay(5000);
   Serial.begin(9600); //Uart
   Serial1.begin(9600); //Displayt  
   //Wire.begin(21, 22, 400000); // 21 & 22 are default on ESP32   
+  
+if (EEPROM.begin(EEPROM_SIZE))
+  {
+  //  EEPROM.write(addr, false);
+    ota = EEPROM.read(addr);
+  }
+
+  
 
   ledcSetup(0, 1000, 8);
   ledcSetup(1, 10000, 8);
@@ -38,7 +45,8 @@ void setup() {
   //attachInterrupt(digitalPinToInterrupt(GP2),isr_2,FALLING);
 
   delay(100);
- 
+  
+  if(ota){
      xTaskCreate(
                     ServerOTA,          
                     "ServerOTA",        
@@ -46,7 +54,7 @@ void setup() {
                     NULL,             
                     1,               
                     NULL);
-
+  }
   xTaskCreate(
                     TempRead,          
                     "TempRead",        
@@ -71,14 +79,15 @@ void setup() {
                     NULL,             /* Parameter passed as input of the task */
                     1,                /* Priority of the task. */
                     NULL);            /* Task handle. */
-  
+  if(!ota){
   xTaskCreate(
                     BLE,          
-                    "BLE",        /* String with name of task. */
-                    10000,            /* Stack size in bytes. */
-                    NULL,             /* Parameter passed as input of the task */
-                    1,                /* Priority of the task. */
-                    NULL);            /* Task handle. */
+                    "BLE",       
+                    10000,           
+                    NULL,             
+                    1,                
+                    NULL);            
+  }
 
   xTaskCreate(
                     Light,          /* Task function. */
