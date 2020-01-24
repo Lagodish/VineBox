@@ -4,9 +4,15 @@
 #include <tasks.h>
 
 
+void IRAM_ATTR isr() {
+  button = true;
+}
+
 void setup() {
   // put your setup code here, to run once:
  // delay(5000);
+
+
   Serial.begin(9600); //Uart
   Serial1.begin(9600); //Displayt  
   //Wire.begin(21, 22, 400000); // 21 & 22 are default on ESP32   
@@ -39,12 +45,24 @@ if (EEPROM.begin(EEPROM_SIZE))
   pinMode(F1 ,OUTPUT);
   pinMode(F2 ,OUTPUT);
   pinMode(GP3 ,OUTPUT);
-  
+
+  pinMode(GP4 ,INPUT_PULLUP);  
   pinMode(GP1,INPUT_PULLUP);
   pinMode(GP2,INPUT_PULLUP);
   //attachInterrupt(digitalPinToInterrupt(GP1),isr_1,FALLING);
   //attachInterrupt(digitalPinToInterrupt(GP2),isr_2,FALLING);
+  attachInterrupt(GP4, isr, FALLING);
 
+for(int i =0; i< 1530; i++){
+
+  ledcWrite(0, brightness);
+  brightness = brightness + fadeAmount; 
+  if (brightness <= 0 || brightness >= 255) {
+    fadeAmount = -fadeAmount;
+  }
+delayMicroseconds(300);
+ //delay(1);  
+}
   delay(100);
   
   if(ota){

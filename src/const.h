@@ -46,7 +46,7 @@ hw_timer_t *timer = NULL;
 
 //Interrupt
 uint16_t intTriggerCount=0;
-
+bool button = false;
 //WIFI
 const char* ssid = "Psin(a)";
 const char* password = "Hey!28R0om!";

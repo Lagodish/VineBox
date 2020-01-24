@@ -1,3 +1,5 @@
+
+#include <md5.h>
 #include <pins.h>
 #include <OneWire.h>
 #include <DallasTemperature.h>
@@ -162,12 +164,18 @@ void OLED( void * parameter)
     vTaskDelete( NULL );
 }
 
-void set_time(int h,int min,int s,int y,int m, int d){
-      //  rtc.adjust(DateTime(F(__DATE__), F(__TIME__)));
-    // This line sets the RTC with an explicit date &amp; time, for example to set
-    // January 21, 2014 at 3am you would call:
-      //   rtc.adjust(DateTime(y, m, d, h, min, s));
-//TODO  
+void set_time(int h,int min){
+    char userTime[8];
+  userTime[0] = h / 10 + '0';
+  userTime[1] = h % 10 + '0';
+  userTime[2] = ':';
+  userTime[3] = min / 10 + '0';
+  userTime[4] = min % 10 + '0';
+  userTime[5] = ':';
+  userTime[6] = '0';
+  userTime[7] = '0';
+  RtcDateTime manual = RtcDateTime(__DATE__, userTime);
+  Rtc.SetDateTime(manual);
 
 }
 
@@ -385,9 +393,9 @@ void BLE( void * parameter)
         }
         else
         {
-            ESP_BT.print("Please write h,m,s,y,m,d one by one");
-            int set[6];
-            for(int i=0; i< 6; i++){
+            ESP_BT.print("Please write h,m one by one");
+            int set[2];
+            for(int i=0; i< 2; i++){
 
                 while (!ESP_BT.available())
                 {
@@ -402,7 +410,7 @@ void BLE( void * parameter)
             }
         }
         
-        ESP_BT.printf("Time: %d:%d:%d %d.%d.%d", set[0],set[1],set[2],set[3],set[4],set[5]);
+        ESP_BT.printf("Time: %d:%d", set[0],set[1]);
         ESP_BT.println("Correct? Y/n");
         bool test = true;
         while (test)
@@ -412,7 +420,7 @@ void BLE( void * parameter)
          String str = ESP_BT.readString();
 
          if(str.equals("Y\r\n")||str.equals("y\r\n")){
-                set_time(set[0],set[1],set[2],set[3],set[4],set[5]);
+                set_time(set[0],set[1]);
                 ESP_BT.println("Setted!");
                 test = false;
           }
@@ -599,6 +607,20 @@ void Static( void * parameter)
         Serial.println("Int!");
     }
 
+    if(button){
+
+        button = false;
+
+        if (EEPROM.begin(EEPROM_SIZE))
+            {
+            EEPROM.write(addr,true);
+            EEPROM.commit();
+            vTaskDelay(100);
+            resetModule();
+        }
+
+    }
+
     vTaskDelay(1000);
     
     }
@@ -645,13 +667,12 @@ WiFi.mode(WIFI_STA);
    // char* name = "VineBox_" + String((uint16_t)(chipid>>32));
   // Hostname defaults to esp3232-[MAC]
    ArduinoOTA.setHostname("VineBoxOTA");
+ 
+  
+     ArduinoOTA.setPassword(pass_);
 
-  // No authentication by default
-   ArduinoOTA.setPassword("VineBoxPass");
-
-  // Password can be set with it's md5 value as well
-  // MD5(admin) = 21232f297a57a5a743894a0e4a801fc3
-  // ArduinoOTA.setPasswordHash("21232f297a57a5a743894a0e4a801fc3");
+    //Sets the password as above but in the form MD5(password). Default NULL
+    //ArduinoOTA.setPasswordHash(md5_);
 
   ArduinoOTA
     .onStart([]() {
