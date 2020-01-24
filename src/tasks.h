@@ -656,12 +656,9 @@ void ServerOTA( void * parameter)
 
 WiFi.mode(WIFI_STA);
   WiFi.begin(ssid, password);
-    uint64_t chipid; 
-    chipid=ESP.getEfuseMac();
-    String chip = ("VineBox_" + String((uint16_t)(chipid>>32)));
-    char *cstr = new char[chip.length() + 1];
-    strcpy(cstr, chip.c_str());
-  WiFi.setHostname(cstr);
+    //WiFi.setHostname("VineBox");
+  //  tcpip_adapter_set_hostname
+    
     while (WiFi.status() != WL_CONNECTED) {
         vTaskDelay(1000);
         Serial.print(".");
