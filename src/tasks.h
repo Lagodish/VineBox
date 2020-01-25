@@ -218,7 +218,7 @@ void BLE( void * parameter)
         String str = ESP_BT.readString();
         Serial.print(str);
         u8g2log.print(str);
-            
+            //numberOfDevices
     if(str.equals("help\r\n")||str.equals("h\r\n")||str.equals("Help\r\n")){
         ESP_BT.println("Available commands help/h (-a), set/s, flags/f, time, temp/t, light/l,ota -on/off reboot"); 
     }
@@ -227,6 +227,36 @@ void BLE( void * parameter)
     }
         if(str.equals("Fade\r\n")||str.equals("fade\r\n")){
         fade = !fade;
+    }
+ 
+        if(str.equals("ds18\r\n")||str.equals("ds18b20\r\n")||str.equals("Ds18\r\n")||str.equals("Ds18b20\r\n")){
+         int val[1];
+        ESP_BT.println("Please wrie numberOfDevices"); 
+        for(int i=0; i < 1; i++){
+        val[i]=0;
+        while (!ESP_BT.available())
+        {
+         vTaskDelay(10);   
+        }
+                       
+        val[i]=ESP_BT.parseInt();
+
+        if(val[i]==0){
+            i--;
+            continue;
+        }
+        if(val[i]>100){
+            val[i]=100;
+        }
+        if(val[i]<0){
+            val[i]=1;
+        }
+
+
+        }
+        EEPROM.write(3,val[0]); //TODO fix indexs
+        EEPROM.commit();
+        numberOfDevices=val[0];val[0];
     }
 
     if(str.equals("err_flag\r\n")){
