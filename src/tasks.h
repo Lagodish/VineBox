@@ -216,12 +216,34 @@ void BLE( void * parameter)
         u8g2log.print(str);
             //numberOfDevices
     if(str.equals("help\r\n")||str.equals("h\r\n")||str.equals("Help\r\n")){
-        ESP_BT.println("Available commands help/h (-a), set/s, flags/f, time, temp/t, light/l,ota -on/off reboot"); 
+        ESP_BT.println("Available commands help/h (-a), set/s, flags/f, time, temp/t, light/l,ota -on/off, reboot"); 
     }
     if(str.equals("help -a\r\n")||str.equals("h -a\r\n")||str.equals("Help -a\r\n")){
-        ESP_BT.println("More cmnd: err_flag "); 
+        ESP_BT.println("More cmnd: err_flag, ds18, ds18_set"); 
     }
-        if(str.equals("Fade\r\n")||str.equals("fade\r\n")){
+        if(str.equals("Ds18_set\r\n")||str.equals("ds18_set\r\n")){
+        
+        ESP_BT.println("With heatter? Y/n"); //TODO
+        bool test = true;
+        while (test)
+        {           
+            if (ESP_BT.available())
+           {         
+         String str = ESP_BT.readString();
+
+         if(str.equals("Y\r\n")||str.equals("y\r\n")){
+                ESP_BT.println("With heatter");
+                test = false;
+          }
+          else if(str.equals("N\r\n")||str.equals("n\r\n")){
+            ESP_BT.println("Without heatter!");
+            test = false;
+          }        
+        }
+
+    }
+
+            if(str.equals("Fade\r\n")||str.equals("fade\r\n")){
         fade = !fade;
     }
  
@@ -473,9 +495,6 @@ void BLE( void * parameter)
             ESP_BT.println("Aborted!");
             test = false;
           }        
-        }
-        else{
-            vTaskDelay(10);  
         }
         }              
      }       

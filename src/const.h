@@ -7,12 +7,12 @@ const int ledChannel = 0;
 const int resolution = 10; //Resolution 8, 10, 12, 15
 
 //Light
-int fadeAmount = 1;    // how many points to fade the LED by
-int brightness = 0;
-int briR = 0;
-int briG = 0;
-int briB = 0;
-int briW = 0;
+uint8_t fadeAmount = 1;    // how many points to fade the LED by
+uint8_t brightness = 0;
+uint8_t briR = 0;
+uint8_t briG = 0;
+uint8_t briB = 0;
+uint8_t briW = 0;
 
 //boot
 bool ota = false;
@@ -20,16 +20,22 @@ bool ts = false;
 
 //DS18B20 setup
 const int oneWireBus = DS18B20;
-int numberOfDevices = 0; // Number of temperature devices found
+uint8_t numberOfDevices = 0; // Number of temperature devices found
 float tempC[5];
 
+uint8_t heatter_n = 0;
+uint8_t zone_1_1_n = 0;
+uint8_t zone_1_2_n = 0;
+uint8_t zone_2_1_n = 0;
+uint8_t zone_2_2_n = 0;
+
 //RTC
-int h_rtc = 0;
-int min_rtc = 0;
-int sec_rtc = 0;
-int d_rtc = 0;
-int m_rtc = 0;
-int y_rtc = 0;
+uint8_t h_rtc = 0;
+uint8_t min_rtc = 0;
+uint8_t sec_rtc = 0;
+uint8_t d_rtc = 0;
+uint8_t m_rtc = 0;
+uint8_t y_rtc = 0;
 bool set_t = false;
 double temp_rtc = 0;
 
@@ -41,7 +47,7 @@ bool i2c = false;
 
 
 //WDT
-const int wdtTimeout = 5000;  //time in ms to trigger the watchdog
+const uint8_t wdtTimeout = 5000;  //time in ms to trigger the watchdog
 hw_timer_t *timer = NULL;
 
 //Interrupt
@@ -53,7 +59,7 @@ const char* password = "Hey!28R0om!";
 const char* host = "esp32";
 
 //eeprom
-int addr = 0;
+uint8_t addr = 0;
 #define EEPROM_SIZE 64
 
 // Flags
@@ -67,6 +73,6 @@ bool beeper_flag = true;
 bool err_flag = false;
 String err_str = "";
 bool fade = false;
-int def_time = 6;
-int err_delay = def_time;
+uint8_t def_time = 6;
+uint8_t err_delay = def_time;
 //err_str += "RTC, ";
