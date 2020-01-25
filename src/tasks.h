@@ -38,13 +38,27 @@ void Light( void * parameter )
    ledcAttachPin(B, 3);
    ledcAttachPin(W, 4);
         */
+       int brt = 0;
+       int step = 5;
 
     while(1){
 
         ledcWrite(3, briB);
         ledcWrite(1, briR);
         ledcWrite(2, briG);
-        ledcWrite(4, briW);
+        if(fade){
+   brt = brt + step; 
+   if (brt <= 0 || brt >= 255) {
+    step = -step;
+  }
+
+     ledcWrite(4, brt);
+     
+        }
+        else{
+             ledcWrite(4, briW);
+        }
+       
 
         vTaskDelay(100);    
 

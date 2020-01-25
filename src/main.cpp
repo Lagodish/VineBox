@@ -3,7 +3,6 @@
 #include <const.h>
 #include <tasks.h>
 
-
 void IRAM_ATTR isr() {
   button = true;
 }
