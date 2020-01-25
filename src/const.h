@@ -12,8 +12,12 @@ uint8_t briR = 0;
 uint8_t briG = 0;
 uint8_t briB = 0;
 uint8_t briW = 0;
-uint8_t briMAX = 150;
-uint8_t briMIN = 10;
+int briMAX = 150;
+int briMIN = 10;
+
+//FAde
+       int brt = 0;
+       int step = 1;
 
 //boot
 bool ota = false;
