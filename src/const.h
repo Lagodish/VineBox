@@ -1,6 +1,5 @@
 #include <Arduino.h>
 
-
 //PWM setup
 const int freq = 5000;
 const int ledChannel = 0;
@@ -36,14 +35,10 @@ uint8_t sec_rtc = 0;
 uint8_t d_rtc = 0;
 uint8_t m_rtc = 0;
 uint8_t y_rtc = 0;
-bool set_t = false;
 double temp_rtc = 0;
 
-//oled
-//#define SCREEN_WIDTH 128 // OLED display width, in pixels
-//#define SCREEN_HEIGHT 64 // OLED display height, in pixels
+//i2c
 bool i2c = false;
-//#define OLED_RESET     -1 // Reset pin # (or -1 if sharing Arduino reset pin)
 
 
 //WDT
@@ -54,13 +49,22 @@ hw_timer_t *timer = NULL;
 uint16_t intTriggerCount=0;
 bool button = false;
 //WIFI
-const char* ssid = "Psin(a)";
-const char* password = "Hey!28R0om!";
-const char* host = "esp32";
+char* ssid = "Psin(a)";
+char* password = "Hey!28R0om!";
+char* host = "esp32"; 
 
 //eeprom
-uint8_t addr = 0;
 #define EEPROM_SIZE 64
+uint8_t ota_e = 0;
+uint8_t ts_e = 1;
+uint8_t heatter_e = 2;
+uint8_t zone_1_1_e = 3;
+uint8_t zone_1_2_e = 4;
+uint8_t zone_2_1_e = 5;
+uint8_t zone_2_2_e = 6;
+uint8_t numberOfDevices_e = 7;
+uint8_t bssid_e = 8;
+uint8_t pass_e = 9;
 
 // Flags
 bool light_flag = true;
@@ -71,8 +75,10 @@ bool fan1_flag = false;
 bool fan2_flag = false;
 bool beeper_flag = true;
 bool err_flag = false;
-String err_str = "";
+
+bool set_t = false;
 bool fade = false;
+
+String err_str = "";
 uint8_t def_time = 6;
 uint8_t err_delay = def_time;
-//err_str += "RTC, ";

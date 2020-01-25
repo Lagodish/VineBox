@@ -30,13 +30,13 @@ void IRAM_ATTR resetModule() {
 
 void Light( void * parameter )
 {
-        Serial.println("Light");
+     Serial.println("Light");
         /*
-           ledcAttachPin(GP3, 0);
-   ledcAttachPin(R, 1);
-   ledcAttachPin(G, 2);
-   ledcAttachPin(B, 3);
-   ledcAttachPin(W, 4);
+    ledcAttachPin(GP3, 0);
+    ledcAttachPin(R, 1);
+    ledcAttachPin(G, 2);
+    ledcAttachPin(B, 3);
+    ledcAttachPin(W, 4);
         */
        int brt = 0;
        int step = 1;
@@ -201,28 +201,31 @@ void BLE( void * parameter)
     BluetoothSerial ESP_BT; //Object for Bluetooth
     //ESP_BT.esp_ble_power_type_t(9);
     //ESP_BT.esp_power_level_t(7);
-  //  ESP_BT.esp_ble_tx_power_set(ESP_BLE_PWR_TYPE_ADV, ESP_PWR_LVL_P9);
+    //ESP_BT.esp_ble_tx_power_set(ESP_BLE_PWR_TYPE_ADV, ESP_PWR_LVL_P9);
     ESP_BT.begin("VineBox_" + String((uint16_t)(chipid>>32))); //Name of your Bluetooth Signal
     ESP_BT.println("BLE works!");
-
+    
 
     while(1){ 
 
 
 
     if (ESP_BT.available()) {
+        
         String str = ESP_BT.readString();
         Serial.print(str);
         u8g2log.print(str);
-            //numberOfDevices
+    
     if(str.equals("help\r\n")||str.equals("h\r\n")||str.equals("Help\r\n")){
         ESP_BT.println("Available commands help/h (-a), set/s, flags/f, time, temp/t, light/l,ota -on/off, reboot"); 
     }
+
     if(str.equals("help -a\r\n")||str.equals("h -a\r\n")||str.equals("Help -a\r\n")){
-        ESP_BT.println("More cmnd: err_flag, ds18, ds18_set"); 
+        ESP_BT.println("More cmnd: err_flag, ds18, ds18_set, wifi"); 
     }
-        if(str.equals("Ds18_set\r\n")||str.equals("ds18_set\r\n")){
-        
+
+    if(str.equals("Ds18_set\r\n")||str.equals("ds18_set\r\n")){
+                //numberOfDevices
         ESP_BT.println("With heatter? Y/n"); //TODO
         bool test = true;
         while (test)
@@ -240,13 +243,20 @@ void BLE( void * parameter)
             test = false;
           }        
         }
-
+             //......................................
     }
 
-            if(str.equals("Fade\r\n")||str.equals("fade\r\n")){
+        if(str.equals("Fade\r\n")||str.equals("fade\r\n")){
         fade = !fade;
-    }
+           }
  
+        if(str.equals("Wifi\r\n")||str.equals("wifi\r\n")){
+        ESP_BT.println("With heatter? Y/n"); //TODO
+        ESP_BT.println("Please write your WIFI name, pass"); //TODO 
+        // EEPROM.writeString(bssid_e/pass_e, gratitude); 
+        //......................................
+           }
+
         if(str.equals("ds18\r\n")||str.equals("ds18b20\r\n")||str.equals("Ds18\r\n")||str.equals("Ds18b20\r\n")){
          int val[1];
         ESP_BT.println("Please wrie numberOfDevices"); 
@@ -272,7 +282,7 @@ void BLE( void * parameter)
 
 
         }
-        EEPROM.write(3,val[0]); //TODO fix indexs
+        EEPROM.write(numberOfDevices_e,val[0]); //TODO fix indexs
         EEPROM.commit();
         numberOfDevices=val[0];
         ESP_BT.println("OK!"); 
@@ -313,7 +323,7 @@ void BLE( void * parameter)
     if(str.equals("Ota -on\r\n")||str.equals("ota -on\r\n")||str.equals("OTA -on\r\n")||str.equals("OTA\r\n")){
         if (EEPROM.begin(EEPROM_SIZE))
             {
-            EEPROM.write(addr,true);
+            EEPROM.write(ota_e,true);
             EEPROM.commit();
             ESP_BT.println("OTA ON! Reboot..."); 
             vTaskDelay(100);
@@ -328,7 +338,7 @@ void BLE( void * parameter)
         if(str.equals("Ota -off\r\n")||str.equals("ota -off\r\n")||str.equals("OTA -off\r\n")){
         if (EEPROM.begin(EEPROM_SIZE))
             {
-            EEPROM.write(addr,false);
+            EEPROM.write(ota_e,false);
             EEPROM.commit();
             ESP_BT.println("OTA OFF!"); 
         }
@@ -578,7 +588,7 @@ void RTC( void * parameter)
     RtcDateTime compiled = RtcDateTime(__DATE__, __TIME__);
     if(ts){
         set_t = true;
-        EEPROM.write(2,false);
+        EEPROM.write(ts_e,false);
         EEPROM.commit();
     }
     i2c = false;
@@ -677,7 +687,7 @@ void Static( void * parameter)
 
         if (EEPROM.begin(EEPROM_SIZE))
             {
-            EEPROM.write(addr,true);
+            EEPROM.write(ota_e,true);
             EEPROM.commit();
             vTaskDelay(100);
             resetModule();
@@ -755,8 +765,8 @@ WiFi.mode(WIFI_STA);
     .onEnd([]() {
     
             set_t = true;
-            EEPROM.write(addr,false);
-            EEPROM.write(2,true);
+            EEPROM.write(ota_e,false);
+            EEPROM.write(ts_e,true);
             EEPROM.commit();
 //vTaskDelay(2000); 
  ///       

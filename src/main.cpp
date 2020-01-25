@@ -21,8 +21,14 @@ if (EEPROM.begin(EEPROM_SIZE))
   //  EEPROM.write(addr, false);
   //  EEPROM.write(addr,false);
  // EEPROM.commit();
-    ota = EEPROM.read(addr);
-    ts = EEPROM.read(2);
+    ota = EEPROM.read(ota_e);
+    ts = EEPROM.read(ts_e);
+    heatter_n = EEPROM.read(heatter_e);
+    zone_1_1_n = EEPROM.read(zone_1_1_e);
+    zone_1_2_n = EEPROM.read(zone_1_2_e);
+    zone_2_1_n = EEPROM.read(zone_2_1_e);
+    zone_2_2_n = EEPROM.read(zone_2_2_e);
+
     numberOfDevices=EEPROM.read(3);
     if((numberOfDevices<0)||(numberOfDevices>5)){
       numberOfDevices = 0;
@@ -54,8 +60,7 @@ if (EEPROM.begin(EEPROM_SIZE))
   pinMode(GP4 ,INPUT_PULLUP);  
   pinMode(GP1,INPUT_PULLUP);
   pinMode(GP2,INPUT_PULLUP);
-  //attachInterrupt(digitalPinToInterrupt(GP1),isr_1,FALLING);
-  //attachInterrupt(digitalPinToInterrupt(GP2),isr_2,FALLING);
+
   attachInterrupt(GP4, isr, FALLING);
 
 for(int i =0; i< 3000; i++){
