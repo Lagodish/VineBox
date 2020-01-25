@@ -49,7 +49,7 @@ void Light( void * parameter )
         if(fade){
    brt = brt + step; 
 
-   if (brt <= 0 || brt >= 255) {
+   if (brt <= briMIN || brt >= briMAX) {
     step = -step;
   }
 
@@ -222,8 +222,50 @@ void BLE( void * parameter)
     }
 
     if(str.equals("help -a\r\n")||str.equals("h -a\r\n")||str.equals("Help -a\r\n")){
-        ESP_BT.println("More cmnd: err_flag, ds18, ds18_set, wifi"); 
+        ESP_BT.println("More cmnd: err_flag, ds18, ds18_set, wifi, flag_reset, max_br, min_br"); //TODO lag_rest
     }
+
+    if(str.equals("max_br\r\n")||str.equals("mix_br\r\n")){
+        bool flag_min = false;
+        if(str.equals("mix_br\r\n")) 
+            flag_min = true;
+        
+     ESP_BT.println("Put val<<");
+     
+
+     for(int i=0; i < 1; i++){
+        val[i]=0;
+        while (!ESP_BT.available())
+        {
+         vTaskDelay(10);   
+        }
+                       
+        val[i]=ESP_BT.parseInt();
+
+        if(val[i]==0){
+            i--;
+            continue;
+        }
+        if(val[i]>100){
+            val[i]=100;
+        }
+        if(val[i]<0){
+            val[i]=1;
+        }
+
+
+        }
+        if(flag_min){
+            
+        }
+        EEPROM.write(numberOfDevices_e,val[0]); //TODO fix indexs
+        EEPROM.commit();
+        numberOfDevices=val[0];
+        ESP_BT.println("OK!"); 
+
+
+    }
+
 
     if(str.equals("Ds18_set\r\n")||str.equals("ds18_set\r\n")){
                 //numberOfDevices

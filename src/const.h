@@ -12,6 +12,8 @@ uint8_t briR = 0;
 uint8_t briG = 0;
 uint8_t briB = 0;
 uint8_t briW = 0;
+uint8_t briMAX = 150;
+uint8_t briMIN = 10;
 
 //boot
 bool ota = false;
@@ -65,6 +67,8 @@ const int zone_2_2_e = 6;
 const int numberOfDevices_e = 7;
 const int bssid_e = 8;
 const int pass_e = 9;
+const int briMAX_e = 10;
+const int briMIN_e = 11;
 
 // Flags
 bool light_flag = true;
