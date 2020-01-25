@@ -34,7 +34,7 @@ uint8_t min_rtc = 0;
 uint8_t sec_rtc = 0;
 uint8_t d_rtc = 0;
 uint8_t m_rtc = 0;
-uint8_t y_rtc = 0;
+uint16_t y_rtc = 0;
 double temp_rtc = 0;
 
 //i2c
@@ -42,7 +42,7 @@ bool i2c = false;
 
 
 //WDT
-const uint8_t wdtTimeout = 5000;  //time in ms to trigger the watchdog
+const uint16_t wdtTimeout = 5000;  //time in ms to trigger the watchdog
 hw_timer_t *timer = NULL;
 
 //Interrupt

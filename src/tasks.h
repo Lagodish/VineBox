@@ -134,12 +134,13 @@ void OLED( void * parameter)
     
     i2c = true;
 
-      u8g2.begin();  
-      u8g2.clear();
-  u8g2.setFont(u8g2_font_synchronizer_nbp_tf);	// set the font for the terminal window
-  u8g2log.begin(u8g2, U8LOG_WIDTH, U8LOG_HEIGHT, u8log_buffer);
-  u8g2log.setLineHeightOffset(0);	// set extra space between lines in pixel, this can be negative
-  u8g2log.setRedrawMode(1);		// 0: Update screen with newline, 1: Update screen for every char  
+    u8g2.begin();  
+    vTaskDelay(100);
+    u8g2.clear();
+    u8g2.setFont(u8g2_font_synchronizer_nbp_tf);	// set the font for the terminal window
+    u8g2log.begin(u8g2, U8LOG_WIDTH, U8LOG_HEIGHT, u8log_buffer);
+    u8g2log.setLineHeightOffset(0);	// set extra space between lines in pixel, this can be negative
+    u8g2log.setRedrawMode(1);		// 0: Update screen with newline, 1: Update screen for every char  
 
     i2c = false;
    
@@ -204,7 +205,7 @@ void BLE( void * parameter)
     //ESP_BT.esp_ble_tx_power_set(ESP_BLE_PWR_TYPE_ADV, ESP_PWR_LVL_P9);
     ESP_BT.begin("VineBox_" + String((uint16_t)(chipid>>32))); //Name of your Bluetooth Signal
     ESP_BT.println("BLE works!");
-    
+
 
     while(1){ 
 
@@ -244,6 +245,7 @@ void BLE( void * parameter)
           }        
         }
              //......................................
+    }
     }
 
         if(str.equals("Fade\r\n")||str.equals("fade\r\n")){
@@ -440,7 +442,7 @@ void BLE( void * parameter)
         }
         else{
         //str.equalsIgnoreCase("*-r*")''
-        if((h_rtc>24)||(min_rtc>59)||(sec_rtc>59)||(d_rtc>33)||(m_rtc>12)){
+        if((h_rtc>24)||(min_rtc>59)||(h_rtc<0)||(min_rtc<0)){
             ESP_BT.print("RTC Err!");//(h_rtc>24)||(min_rtc>59)||(sec_rtc>59)||(d_rtc>33)||(m_rtc>13)
         }
         else{
@@ -706,16 +708,34 @@ void Static( void * parameter)
 void led( void * parameter)
 {
     Serial.println("led");
+    int i=0;
+    int y=0;
+    int z=255;
 
     while(1){
+    if(!ota){
+    brightness = brightness + fadeAmount; 
+    if (brightness <= 0 || brightness >= 255) {
+     fadeAmount = -fadeAmount;
+     }
+    vTaskDelay(err_delay); 
+    ledcWrite(0, brightness);  
+    }
+    else{
+            for(i=0;i < 3; i++){
+                for(y=0; y < 256; y++){
+                    ledcWrite(0, y);  
+                    vTaskDelay(1); 
+                }
 
-        ledcWrite(0, brightness);
-  brightness = brightness + fadeAmount; 
-  if (brightness <= 0 || brightness >= 255) {
-    fadeAmount = -fadeAmount;
-  }
-
- vTaskDelay(err_delay);    
+                for(z=255; z > -1; z--){
+                    ledcWrite(0, z); 
+                    vTaskDelay(1); 
+                }                
+            }
+            vTaskDelay(1000); 
+    } 
+        
 
     }
 

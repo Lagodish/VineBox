@@ -8,19 +8,12 @@ void IRAM_ATTR isr() {
 }
 
 void setup() {
-  // put your setup code here, to run once:
- // delay(5000);
-
 
   Serial.begin(9600); //Uart
   Serial1.begin(9600); //Displayt  
-  //Wire.begin(21, 22, 400000); // 21 & 22 are default on ESP32   
 
 if (EEPROM.begin(EEPROM_SIZE))
   {
-  //  EEPROM.write(addr, false);
-  //  EEPROM.write(addr,false);
- // EEPROM.commit();
     ota = EEPROM.read(ota_e);
     ts = EEPROM.read(ts_e);
     heatter_n = EEPROM.read(heatter_e);
@@ -70,7 +63,7 @@ for(int i =0; i< 3000; i++){
   if (brightness <= 0 || brightness >= 255) {
     fadeAmount = -fadeAmount;
   }
-delayMicroseconds(100);
+delayMicroseconds(400);
  //delay(1);  
 }
   delay(100);
