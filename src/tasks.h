@@ -667,7 +667,6 @@ void Wdt( void * parameter)
 void Static( void * parameter)
 {
     Serial.println("Static");
-    uint16_t old_Value=0; 
     
     while(1){
 
@@ -676,11 +675,6 @@ void Static( void * parameter)
     }
     else{
         err_delay = def_time;
-    }
-
-    if(old_Value != intTriggerCount){
-        old_Value = intTriggerCount; // something to compare against
-        Serial.println("Int!");
     }
 
     if(button){
@@ -714,12 +708,14 @@ void led( void * parameter)
 
     while(1){
     if(!ota){
+
     brightness = brightness + fadeAmount; 
     if (brightness <= 0 || brightness >= 255) {
      fadeAmount = -fadeAmount;
      }
     vTaskDelay(err_delay); 
     ledcWrite(0, brightness);  
+    
     }
     else{
             for(i=0;i < 3; i++){
@@ -746,9 +742,9 @@ void led( void * parameter)
 
 void ServerOTA( void * parameter)
 {
-    Serial.println("ServerOTA");
+  Serial.println("ServerOTA");
 
-WiFi.mode(WIFI_STA);
+  WiFi.mode(WIFI_STA);
   WiFi.begin(ssid, password);
     //WiFi.setHostname("VineBox");
   //  tcpip_adapter_set_hostname
@@ -764,9 +760,7 @@ WiFi.mode(WIFI_STA);
    // char* name = "VineBox_" + String((uint16_t)(chipid>>32));
   // Hostname defaults to esp3232-[MAC]
    ArduinoOTA.setHostname("VineBoxOTA");
- 
-  
-     ArduinoOTA.setPassword(pass_);
+   ArduinoOTA.setPassword(pass_);
 
     //Sets the password as above but in the form MD5(password). Default NULL
     //ArduinoOTA.setPasswordHash(md5_);
@@ -784,13 +778,16 @@ WiFi.mode(WIFI_STA);
     })
     .onEnd([]() {
     
-            set_t = true;
+    if (EEPROM.begin(EEPROM_SIZE))
+            {
             EEPROM.write(ota_e,false);
             EEPROM.write(ts_e,true);
             EEPROM.commit();
+            Serial.println("\nOTA off!");
+            }
 //vTaskDelay(2000); 
  ///       
-      Serial.println("\nEnd");
+      Serial.println("End");
     })
     .onProgress([](unsigned int progress, unsigned int total) {
       Serial.printf("Progress: %u%%\r\n", (progress / (total / 100)));

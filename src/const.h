@@ -29,12 +29,12 @@ uint8_t zone_2_1_n = 0;
 uint8_t zone_2_2_n = 0;
 
 //RTC
-uint8_t h_rtc = 0;
-uint8_t min_rtc = 0;
-uint8_t sec_rtc = 0;
-uint8_t d_rtc = 0;
-uint8_t m_rtc = 0;
-uint16_t y_rtc = 0;
+int h_rtc = 0;
+int min_rtc = 0;
+int sec_rtc = 0;
+int d_rtc = 0;
+int m_rtc = 0;
+int y_rtc = 0;
 double temp_rtc = 0;
 
 //i2c
@@ -46,8 +46,8 @@ const uint16_t wdtTimeout = 5000;  //time in ms to trigger the watchdog
 hw_timer_t *timer = NULL;
 
 //Interrupt
-uint16_t intTriggerCount=0;
 bool button = false;
+
 //WIFI
 char* ssid = "Psin(a)";
 char* password = "Hey!28R0om!";
@@ -55,16 +55,16 @@ char* host = "esp32";
 
 //eeprom
 #define EEPROM_SIZE 64
-uint8_t ota_e = 0;
-uint8_t ts_e = 1;
-uint8_t heatter_e = 2;
-uint8_t zone_1_1_e = 3;
-uint8_t zone_1_2_e = 4;
-uint8_t zone_2_1_e = 5;
-uint8_t zone_2_2_e = 6;
-uint8_t numberOfDevices_e = 7;
-uint8_t bssid_e = 8;
-uint8_t pass_e = 9;
+const int ota_e = 0;
+const int ts_e = 1;
+const int heatter_e = 2;
+const int zone_1_1_e = 3;
+const int zone_1_2_e = 4;
+const int zone_2_1_e = 5;
+const int zone_2_2_e = 6;
+const int numberOfDevices_e = 7;
+const int bssid_e = 8;
+const int pass_e = 9;
 
 // Flags
 bool light_flag = true;

@@ -22,7 +22,7 @@ if (EEPROM.begin(EEPROM_SIZE))
     zone_2_1_n = EEPROM.read(zone_2_1_e);
     zone_2_2_n = EEPROM.read(zone_2_2_e);
 
-    numberOfDevices=EEPROM.read(3);
+    numberOfDevices=EEPROM.read(numberOfDevices_e);
     if((numberOfDevices<0)||(numberOfDevices>5)){
       numberOfDevices = 0;
     }
