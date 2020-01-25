@@ -246,21 +246,26 @@ void BLE( void * parameter)
             i--;
             continue;
         }
-        if(val[i]>100){
-            val[i]=100;
+        if(val[i]>255){
+            val[i]=255;
         }
         if(val[i]<0){
-            val[i]=1;
+            val[i]=0;
         }
 
 
         }
         if(flag_min){
-            
+            EEPROM.write(briMIN_e,val[0]); 
+            briMIN = val[0];
         }
-        EEPROM.write(numberOfDevices_e,val[0]); //TODO fix indexs
+        else
+        {
+            EEPROM.write(briMAX_e,val[0]); //TODO fix indexs
+             briMAX = val[0];
+        }
+        
         EEPROM.commit();
-        numberOfDevices=val[0];
         ESP_BT.println("OK!"); 
 
 
