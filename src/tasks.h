@@ -39,7 +39,7 @@ void Light( void * parameter )
    ledcAttachPin(W, 4);
         */
        int brt = 0;
-       int step = 5;
+       int step = 1;
 
     while(1){
 
@@ -48,6 +48,7 @@ void Light( void * parameter )
         ledcWrite(2, briG);
         if(fade){
    brt = brt + step; 
+
    if (brt <= 0 || brt >= 255) {
     step = -step;
   }
@@ -60,7 +61,7 @@ void Light( void * parameter )
         }
        
 
-        vTaskDelay(100);    
+        vTaskDelay(50);    
 
     }
 
@@ -223,6 +224,9 @@ void BLE( void * parameter)
     }
     if(str.equals("help -a\r\n")||str.equals("h -a\r\n")||str.equals("Help -a\r\n")){
         ESP_BT.println("More cmnd: err_flag "); 
+    }
+        if(str.equals("Fade\r\n")||str.equals("fade\r\n")){
+        fade = !fade;
     }
 
     if(str.equals("err_flag\r\n")){
