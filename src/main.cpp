@@ -53,14 +53,14 @@ if (EEPROM.begin(EEPROM_SIZE))
   //attachInterrupt(digitalPinToInterrupt(GP2),isr_2,FALLING);
   attachInterrupt(GP4, isr, FALLING);
 
-for(int i =0; i< 1530; i++){
+for(int i =0; i< 3000; i++){
 
   ledcWrite(0, brightness);
   brightness = brightness + fadeAmount; 
   if (brightness <= 0 || brightness >= 255) {
     fadeAmount = -fadeAmount;
   }
-delayMicroseconds(300);
+delayMicroseconds(100);
  //delay(1);  
 }
   delay(100);
