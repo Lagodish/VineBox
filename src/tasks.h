@@ -82,10 +82,6 @@ void TempRead( void * parameter)
     // Start the DS18B20 sensor
     sensors.begin();
     vTaskDelay(100);
-    numberOfDevices = 1;//sensors.getDeviceCount()+1;
-    //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  Serial.print("Found ");
-  Serial.print(numberOfDevices, DEC);
   
     while(1){
 sensors.requestTemperatures();
@@ -256,7 +252,8 @@ void BLE( void * parameter)
         }
         EEPROM.write(3,val[0]); //TODO fix indexs
         EEPROM.commit();
-        numberOfDevices=val[0];val[0];
+        numberOfDevices=val[0];
+        ESP_BT.println("OK!"); 
     }
 
     if(str.equals("err_flag\r\n")){
@@ -367,11 +364,11 @@ void BLE( void * parameter)
                 ESP_BT.print(tempC[i]);
                 ESP_BT.print(" C");
                 ESP_BT.println("");
-                if(Rtc.IsDateTimeValid()){
+                }
+                    if(Rtc.IsDateTimeValid()){
                     ESP_BT.printf("Temp[RTC]: %.2f C", temp_rtc);
+                    ESP_BT.println("");
                 }
-                }
-    
             }
             }
     if(str.equals("flags\r\n")||str.equals("f\r\n")){
