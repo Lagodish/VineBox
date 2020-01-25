@@ -1,4 +1,4 @@
-
+#include <Arduino.h>
 #include <md5.h>
 #include <pins.h>
 #include <OneWire.h>
@@ -38,13 +38,27 @@ void Light( void * parameter )
    ledcAttachPin(B, 3);
    ledcAttachPin(W, 4);
         */
+       int brt = 0;
+       int step = 5;
 
     while(1){
 
         ledcWrite(3, briB);
         ledcWrite(1, briR);
         ledcWrite(2, briG);
-        ledcWrite(4, briW);
+        if(fade){
+   brt = brt + step; 
+   if (brt <= 0 || brt >= 255) {
+    step = -step;
+  }
+
+     ledcWrite(4, brt);
+     
+        }
+        else{
+             ledcWrite(4, briW);
+        }
+       
 
         vTaskDelay(100);    
 
@@ -656,6 +670,9 @@ void ServerOTA( void * parameter)
 
 WiFi.mode(WIFI_STA);
   WiFi.begin(ssid, password);
+    //WiFi.setHostname("VineBox");
+  //  tcpip_adapter_set_hostname
+    
     while (WiFi.status() != WL_CONNECTED) {
         vTaskDelay(1000);
         Serial.print(".");

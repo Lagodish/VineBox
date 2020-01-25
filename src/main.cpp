@@ -3,7 +3,6 @@
 #include <const.h>
 #include <tasks.h>
 
-
 void IRAM_ATTR isr() {
   button = true;
 }
@@ -16,10 +15,12 @@ void setup() {
   Serial.begin(9600); //Uart
   Serial1.begin(9600); //Displayt  
   //Wire.begin(21, 22, 400000); // 21 & 22 are default on ESP32   
-  
+
 if (EEPROM.begin(EEPROM_SIZE))
   {
   //  EEPROM.write(addr, false);
+  //  EEPROM.write(addr,false);
+ // EEPROM.commit();
     ota = EEPROM.read(addr);
     ts = EEPROM.read(2);
   }
