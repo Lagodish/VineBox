@@ -24,8 +24,8 @@ if (EEPROM.begin(EEPROM_SIZE))
     ota = EEPROM.read(addr);
     ts = EEPROM.read(2);
     numberOfDevices=EEPROM.read(3);
-    if((numberOfDevices<1)||(numberOfDevices>5)){
-      numberOfDevices = 1;
+    if((numberOfDevices<0)||(numberOfDevices>5)){
+      numberOfDevices = 0;
     }
   }
 
