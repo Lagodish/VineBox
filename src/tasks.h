@@ -30,6 +30,14 @@ void IRAM_ATTR resetModule() {
   esp_restart();
 }
 
+void beep(int f, int d) {
+ledcWriteTone(5, f);
+vTaskDelay(d);
+
+ledcWriteTone(5, 0);
+vTaskDelay(20);
+}
+
 void alarm() {
 beep(NOTE__a, 500);
 beep(NOTE__a, 500);
@@ -109,15 +117,6 @@ beep(NOTE__a, 500);
 beep(NOTE__f, 375);
 beep(NOTE__c, 125);
 beep(NOTE__a, 1000);
-}
-
-void beep(int f, int d) {
-EasyBuzzer.beep(f);
-EasyBuzzer.update();
-vTaskDelay(d);
-EasyBuzzer.stopBeep();
-EasyBuzzer.update();
-vTaskDelay(20);
 }
 
 void Light( void * parameter )
@@ -317,70 +316,11 @@ void BLE( void * parameter)
         ESP_BT.println("More cmnd: \r\nerr_flag, \r\nds18, \r\nds18_set, \r\nwifi, \r\nflag_reset, \r\nmax_br, \r\nmin_br, \r\nl"); //TODO lag_rest
     }
 
-<<<<<<< HEAD
     if(str.equals("beep\r\n")){
-        ESP_BT.println("More cmnd: err_flag, ds18, ds18_set, wifi"); 
+        ESP_BT.println("OK!"); 
+        march = true;
     }
 
-=======
-    if(str.equals("max_br\r\n")||str.equals("min_br\r\n")){
-        bool flag_min = false;
-        if(str.equals("min_br\r\n")) 
-            flag_min = true;
-        
-     ESP_BT.println("Put val<<");
-             int val[1];
-
-     for(int i=0; i < 1; i++){
-        while (!ESP_BT.available())
-        {
-         vTaskDelay(10);   
-        }
-                       
-        val[i]=ESP_BT.parseInt();
-
-        if(val[i]==0){
-            i--;
-            continue;
-        }
-        if(val[i]>255){
-            val[i]=255;
-        }
-        if(val[i]<0){
-            val[i]=0;
-        }
-
-
-        }
-        if(flag_min){
-            ESP_BT.println("Prev min: "+String(EEPROM.read(briMIN_e))); 
-            EEPROM.write(briMIN_e,val[0]); 
-            briMIN = val[0];
-            
-        }
-        else
-        {
-            ESP_BT.println("Prev max: "+String(EEPROM.read(briMAX_e))); 
-            EEPROM.write(briMAX_e,val[0]);  
-             briMAX = val[0];
-        }
-        
-        if((brt > briMIN)&&(brt < briMAX)){
-            ESP_BT.println("OK!");
-        }
-        else{
-            brt = briMIN;
-            ESP_BT.println("OK! (with rst)");
-        }
-
-        EEPROM.commit();
-         
-
-
-    }
-
-
->>>>>>> 975dc4520271fa9f4eb25804c8d87846d719a028
     if(str.equals("Ds18_set\r\n")||str.equals("ds18_set\r\n")){
                 //numberOfDevices
         ESP_BT.println("With heatter? Y/n"); //TODO
@@ -823,8 +763,8 @@ void Wdt( void * parameter)
 void Static( void * parameter)
 {
     Serial.println("Static");
-    EasyBuzzer.setPin(Beeper);
-    
+
+    ledcAttachPin(Beeper, 5);
     while(1){
 
     if(err_flag){

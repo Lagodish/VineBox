@@ -54,6 +54,7 @@ if (EEPROM.begin(EEPROM_SIZE))
   pinMode(F1 ,OUTPUT);
   pinMode(F2 ,OUTPUT);
   pinMode(GP3 ,OUTPUT);
+  pinMode(Beeper ,OUTPUT);
 
   pinMode(GP4 ,INPUT_PULLUP);  
   pinMode(GP1,INPUT_PULLUP);
