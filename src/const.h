@@ -78,6 +78,7 @@ bool err_flag = false;
 
 bool set_t = false;
 bool fade = false;
+bool march = false;
 
 String err_str = "";
 uint8_t def_time = 6;
