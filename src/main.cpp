@@ -21,7 +21,12 @@ if (EEPROM.begin(EEPROM_SIZE))
     zone_1_2_n = EEPROM.read(zone_1_2_e);
     zone_2_1_n = EEPROM.read(zone_2_1_e);
     zone_2_2_n = EEPROM.read(zone_2_2_e);
-
+    briMIN = EEPROM.read(briMIN_e);
+    briMAX = EEPROM.read(briMAX_e);
+    if(briMIN>briMAX){
+      briMAX = 130;
+      briMIN = 0;
+    }
     numberOfDevices=EEPROM.read(numberOfDevices_e);
     if((numberOfDevices<0)||(numberOfDevices>5)){
       numberOfDevices = 0;

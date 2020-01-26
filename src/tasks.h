@@ -130,8 +130,8 @@ void Light( void * parameter )
     ledcAttachPin(B, 3);
     ledcAttachPin(W, 4);
         */
-       int brt = 0;
-       int step = 1;
+
+    brt = briMIN;
 
     while(1){
 
@@ -141,9 +141,9 @@ void Light( void * parameter )
         if(fade){
    brt = brt + step; 
 
-   if (brt <= 0 || brt >= 255) {
-    step = -step;
-  }
+   if (brt <= briMIN || brt >= briMAX) {
+        step = -step;
+        }
 
      ledcWrite(4, brt);
      
@@ -310,17 +310,77 @@ void BLE( void * parameter)
         u8g2log.print(str);
     
     if(str.equals("help\r\n")||str.equals("h\r\n")||str.equals("Help\r\n")){
-        ESP_BT.println("Available commands help/h (-a), set/s, flags/f, time, temp/t, light/l,ota -on/off, reboot"); 
+        ESP_BT.println("Available commands: \r\nhelp/h (-a), \r\nset/s, \r\nflags/f, \r\ntime, \r\ntemp/t,\r\nlight/l,\r\nota -on/off,\r\n reboot"); 
     }
 
     if(str.equals("help -a\r\n")||str.equals("h -a\r\n")||str.equals("Help -a\r\n")){
-        ESP_BT.println("More cmnd: err_flag, ds18, ds18_set, wifi"); 
+        ESP_BT.println("More cmnd: \r\nerr_flag, \r\nds18, \r\nds18_set, \r\nwifi, \r\nflag_reset, \r\nmax_br, \r\nmin_br, \r\nl"); //TODO lag_rest
     }
 
+<<<<<<< HEAD
     if(str.equals("beep\r\n")){
         ESP_BT.println("More cmnd: err_flag, ds18, ds18_set, wifi"); 
     }
 
+=======
+    if(str.equals("max_br\r\n")||str.equals("min_br\r\n")){
+        bool flag_min = false;
+        if(str.equals("min_br\r\n")) 
+            flag_min = true;
+        
+     ESP_BT.println("Put val<<");
+             int val[1];
+
+     for(int i=0; i < 1; i++){
+        while (!ESP_BT.available())
+        {
+         vTaskDelay(10);   
+        }
+                       
+        val[i]=ESP_BT.parseInt();
+
+        if(val[i]==0){
+            i--;
+            continue;
+        }
+        if(val[i]>255){
+            val[i]=255;
+        }
+        if(val[i]<0){
+            val[i]=0;
+        }
+
+
+        }
+        if(flag_min){
+            ESP_BT.println("Prev min: "+String(EEPROM.read(briMIN_e))); 
+            EEPROM.write(briMIN_e,val[0]); 
+            briMIN = val[0];
+            
+        }
+        else
+        {
+            ESP_BT.println("Prev max: "+String(EEPROM.read(briMAX_e))); 
+            EEPROM.write(briMAX_e,val[0]);  
+             briMAX = val[0];
+        }
+        
+        if((brt > briMIN)&&(brt < briMAX)){
+            ESP_BT.println("OK!");
+        }
+        else{
+            brt = briMIN;
+            ESP_BT.println("OK! (with rst)");
+        }
+
+        EEPROM.commit();
+         
+
+
+    }
+
+
+>>>>>>> 975dc4520271fa9f4eb25804c8d87846d719a028
     if(str.equals("Ds18_set\r\n")||str.equals("ds18_set\r\n")){
                 //numberOfDevices
         ESP_BT.println("With heatter? Y/n"); //TODO
