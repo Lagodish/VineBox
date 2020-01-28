@@ -55,9 +55,8 @@ hw_timer_t *timer = NULL;
 bool button = false;
 
 //WIFI
-char* ssid = "Psin(a)";
-char* password = "Hey!28R0om!";
-char* host = "esp32"; 
+const char* ssid = "Psin(a)";
+const char* password = "Hey!28R0om!";
 
 //eeprom
 #define EEPROM_SIZE 64

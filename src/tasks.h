@@ -14,7 +14,6 @@
 #include <WiFiUdp.h>
 #include <ArduinoOTA.h>
 #include "EEPROM.h"
-#include "EasyBuzzer.h"
 
 U8G2_SSD1306_128X64_NONAME_1_HW_I2C u8g2(U8G2_R0, /* reset=*/ U8X8_PIN_NONE);
 
@@ -28,95 +27,6 @@ RtcDS3231<TwoWire> Rtc(Wire);
 void IRAM_ATTR resetModule() {
  // ets_printf("reboot\n");
   esp_restart();
-}
-
-void beep(int f, int d) {
-ledcWriteTone(5, f);
-vTaskDelay(d);
-
-ledcWriteTone(5, 0);
-vTaskDelay(20);
-}
-
-void alarm() {
-beep(NOTE__a, 500);
-beep(NOTE__a, 500);
-beep(NOTE__a, 500);
-beep(NOTE__f, 350);
-beep(NOTE__cH, 150);
-beep(NOTE__a, 500);
-beep(NOTE__f, 350);
-beep(NOTE__cH, 150);
-beep(NOTE__a, 1000);
-beep(NOTE__eH, 500);
-beep(NOTE__eH, 500);
-beep(NOTE__eH, 500);
-beep(NOTE__fH, 350);
-beep(NOTE__cH, 150);
-beep(NOTE__gS, 500);
-beep(NOTE__f, 350);
-beep(NOTE__cH, 150);
-beep(NOTE__a, 1000);
-beep(NOTE__aH, 500);
-beep(NOTE__a, 350);
-beep(NOTE__a, 150);
-beep(NOTE__aH, 500);
-beep(NOTE__gSH, 250);
-beep(NOTE__gH, 250);
-beep(NOTE__fSH, 125);
-beep(NOTE__fH, 125);
-beep(NOTE__fSH, 250);
-
-vTaskDelay(250);
-
-beep(NOTE__aS, 250);
-beep(NOTE__dSH, 500);
-beep(NOTE__dH, 250);
-beep(NOTE__cSH, 250);
-beep(NOTE__cH, 125);
-beep(NOTE__b, 125);
-beep(NOTE__cH, 250);
-
-vTaskDelay(250);
-
-beep(NOTE__f, 125);
-beep(NOTE__gS, 500);
-beep(NOTE__f, 375);
-beep(NOTE__a, 125);
-beep(NOTE__cH, 500);
-beep(NOTE__a, 375);
-beep(NOTE__cH, 125);
-beep(NOTE__eH, 1000);
-beep(NOTE__aH, 500);
-beep(NOTE__a, 350);
-beep(NOTE__a, 150);
-beep(NOTE__aH, 500);
-beep(NOTE__gSH, 250);
-beep(NOTE__gH, 250);
-beep(NOTE__fSH, 125);
-beep(NOTE__fH, 125);
-beep(NOTE__fSH, 250);
-
-vTaskDelay(250);
-
-beep(NOTE__aS, 250);
-beep(NOTE__dSH, 500);
-beep(NOTE__dH, 250);
-beep(NOTE__cSH, 250);
-beep(NOTE__cH, 125);
-beep(NOTE__b, 125);
-beep(NOTE__cH, 250);
-
-vTaskDelay(250);
-
-beep(NOTE__f, 250);
-beep(NOTE__gS, 500);
-beep(NOTE__f, 375);
-beep(NOTE__cH, 125);
-beep(NOTE__a, 500);
-beep(NOTE__f, 375);
-beep(NOTE__c, 125);
-beep(NOTE__a, 1000);
 }
 
 void Light( void * parameter )
@@ -313,12 +223,12 @@ void BLE( void * parameter)
     }
 
     if(str.equals("help -a\r\n")||str.equals("h -a\r\n")||str.equals("Help -a\r\n")){
-        ESP_BT.println("More cmnd: \r\nerr_flag, \r\nds18, \r\nds18_set, \r\nwifi, \r\nflag_reset, \r\nmax_br, \r\nmin_br, \r\nl"); //TODO lag_rest
+        ESP_BT.println("More cmnd: \r\nerr_flag, \r\nds18, \r\nds18_set, \r\nwifi, \r\nflag_reset, \r\nmax_br, \r\nmin_br, \r\nl, beep \r\n"); //TODO lag_rest
     }
 
     if(str.equals("beep\r\n")){
         ESP_BT.println("OK!"); 
-        march = true;
+      //  march = true;
     }
 
     if(str.equals("Ds18_set\r\n")||str.equals("ds18_set\r\n")){
@@ -764,7 +674,6 @@ void Static( void * parameter)
 {
     Serial.println("Static");
 
-    ledcAttachPin(Beeper, 5);
     while(1){
 
     if(err_flag){
@@ -790,7 +699,6 @@ void Static( void * parameter)
 
     if(march){
 
-        alarm();
         march = false;
 
     }
