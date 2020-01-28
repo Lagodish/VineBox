@@ -1,7 +1,6 @@
 #include <Arduino.h>
 #include <md5.h>
 #include <pins.h>
-#include <notes.h>
 #include <OneWire.h>
 #include <DallasTemperature.h>
 #include "BluetoothSerial.h"
