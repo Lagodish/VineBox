@@ -57,8 +57,6 @@ if (EEPROM.begin(EEPROM_SIZE))
   pinMode(Beeper ,OUTPUT);
 
   pinMode(GP4 ,INPUT_PULLUP);  
-  pinMode(GP1,INPUT_PULLUP);
-  pinMode(GP2,INPUT_PULLUP);
 
   attachInterrupt(GP4, isr, FALLING);
 
