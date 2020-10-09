@@ -1,11 +1,9 @@
 #include <Arduino.h>
-#include <md5.h>
 #include <pins.h>
 #include <OneWire.h>
 #include <DallasTemperature.h>
 #include "BluetoothSerial.h"
 #include <RtcDS3231.h>
-#include <SPI.h>
 #include <Wire.h>
 #include <U8g2lib.h>
 #include <WiFi.h>
@@ -14,13 +12,7 @@
 #include <ArduinoOTA.h>
 #include "EEPROM.h"
 
-U8G2_SSD1306_128X64_NONAME_1_HW_I2C u8g2(U8G2_R0, /* reset=*/ U8X8_PIN_NONE);
-
-#define U8LOG_WIDTH 20
-#define U8LOG_HEIGHT 8
-uint8_t u8log_buffer[U8LOG_WIDTH*U8LOG_HEIGHT];
-U8G2LOG u8g2log;
-
+U8G2_SH1106_128X64_NONAME_1_HW_I2C u8g2(U8G2_R0, /* reset=*/ U8X8_PIN_NONE);
 RtcDS3231<TwoWire> Rtc(Wire);
 
 void IRAM_ATTR resetModule() {
@@ -111,71 +103,6 @@ sensors.requestTemperatures();
     vTaskDelete( NULL );
 }
 
-void DisplayOut( void * parameter)
-{
-    Serial.println("DisplayOut");
-    while(1){
-        Serial1.println("Test Display");
-        vTaskDelay(1000);
-    }
-
-    Serial.println("Ending DisplayOut");
-    vTaskDelete( NULL );
-}
-
-
-void OLED( void * parameter)
-{
-    Serial.println("OLED");
-    
-    while(i2c){
-        vTaskDelay(10);
-    }
-    
-    i2c = true;
-
-    u8g2.begin();  
-    vTaskDelay(100);
-    u8g2.clear();
-    u8g2.setFont(u8g2_font_synchronizer_nbp_tf);	// set the font for the terminal window
-    u8g2log.begin(u8g2, U8LOG_WIDTH, U8LOG_HEIGHT, u8log_buffer);
-    u8g2log.setLineHeightOffset(0);	// set extra space between lines in pixel, this can be negative
-    u8g2log.setRedrawMode(1);		// 0: Update screen with newline, 1: Update screen for every char  
-
-    i2c = false;
-   
-    while(1){
-     //   Serial.println("OLED");
-    if(i2c){
-        while(i2c){
-            vTaskDelay(10);
-        }
-    }
-    i2c = true;
-
-
-  char c;
-  while (Serial.available() > 0) {
-    c = Serial.read();			// read from Serial Monitor
-    if(i2c){
-        while(i2c){
-            vTaskDelay(2);
-        }
-    }
-    i2c = true;
-    u8g2log.print(c);               // print to display
-    i2c = false;
-  //  Serial.print(c);                // and print back to monitor
-  }
-       // Serial1.println("Test olED");
-        i2c = false;
-        vTaskDelay(100);
-    }
-
-    Serial.println("Ending OLED");
-    vTaskDelete( NULL );
-}
-
 void set_time(int h,int min){
     char userTime[8];
   userTime[0] = h / 10 + '0';
@@ -215,7 +142,7 @@ void BLE( void * parameter)
         
         String str = ESP_BT.readString();
         Serial.print(str);
-        u8g2log.print(str);
+        //u8g2log.print(str);
     
     if(str.equals("help\r\n")||str.equals("h\r\n")||str.equals("Help\r\n")){
         ESP_BT.println("Available commands: \r\nhelp/h (-a), \r\nset/s, \r\nflags/f, \r\ntime, \r\ntemp/t,\r\nlight/l,\r\nota -on/off,\r\n reboot"); 
@@ -570,18 +497,14 @@ void HeaterCtrl( void * parameter)
     vTaskDelete( NULL );
 }
 
-void RTC( void * parameter)
+void I2C( void * parameter)
 {
-    Serial.println("RTC");
-        if(i2c){
-        while(i2c){
-            vTaskDelay(10);
-        }
-    }
+    Serial.println("I2C");
+    u8g2.begin();
+/*
     int counter = 0;
-    i2c = true;
-      
-     Rtc.Begin();
+    
+    Rtc.Begin();
     Serial.println();
         if (!Rtc.GetIsRunning())
     {
@@ -589,7 +512,7 @@ void RTC( void * parameter)
         Rtc.SetIsRunning(true);
     }
 
-        Rtc.Enable32kHzPin(false);
+    Rtc.Enable32kHzPin(false);
     Rtc.SetSquareWavePin(DS3231SquareWavePin_ModeNone);
 
     RtcDateTime compiled = RtcDateTime(__DATE__, __TIME__);
@@ -601,12 +524,7 @@ void RTC( void * parameter)
     i2c = false;
   //  Rtc.SetDateTime(compiled);
     while(1){
-        if(i2c){
-        while(i2c){
-            vTaskDelay(10);
-        }
-        }
-        i2c = true;
+
     if(set_t){
             Rtc.SetDateTime(compiled);
             set_t = false;
@@ -620,7 +538,6 @@ void RTC( void * parameter)
                 counter = 0;
             counter++;
          err_flag = true;
-       //  err_str += "RTC, ";
 
     }
     else{
@@ -639,7 +556,9 @@ void RTC( void * parameter)
 
     err_flag = false;
     }
-    i2c = false;
+
+*/  while(1){  
+
     vTaskDelay(900);
         
     }
@@ -725,18 +644,18 @@ void led( void * parameter)
      fadeAmount = -fadeAmount;
      }
     vTaskDelay(err_delay); 
-    ledcWrite(0, brightness);  
+  //  ledcWrite(0, brightness);  
     
     }
     else{
             for(i=0;i < 3; i++){
                 for(y=0; y < 256; y++){
-                    ledcWrite(0, y);  
+                  //  ledcWrite(0, y);  
                     vTaskDelay(1); 
                 }
 
                 for(z=255; z > -1; z--){
-                    ledcWrite(0, z); 
+                //    ledcWrite(0, z); 
                     vTaskDelay(1); 
                 }                
             }
@@ -771,7 +690,7 @@ void ServerOTA( void * parameter)
    // char* name = "VineBox_" + String((uint16_t)(chipid>>32));
   // Hostname defaults to esp3232-[MAC]
    ArduinoOTA.setHostname("VineBoxOTA");
-   ArduinoOTA.setPassword(pass_);
+   ArduinoOTA.setPassword("quZJU4KNywpHm9pS");
 
     //Sets the password as above but in the form MD5(password). Default NULL
     //ArduinoOTA.setPasswordHash(md5_);

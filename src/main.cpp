@@ -3,18 +3,17 @@
 #include <const.h>
 #include <tasks.h>
 
-void IRAM_ATTR isr() {
-  button = true;
-}
 
 void setup() {
 
-  Serial.begin(9600); //Uart
-  Serial1.begin(9600); //Displayt  
+  Serial.begin(115200); //Uart
+  Serial1.begin(115200); //Displayt  
+
+  Serial1.println("Boot...");
 
 if (EEPROM.begin(EEPROM_SIZE))
   {
-    ota = EEPROM.read(ota_e);
+    ota = true;//EEPROM.read(ota_e);
     ts = EEPROM.read(ts_e);
     heatter_n = EEPROM.read(heatter_e);
     zone_1_1_n = EEPROM.read(zone_1_1_e);
@@ -35,13 +34,13 @@ if (EEPROM.begin(EEPROM_SIZE))
 
   
 
-  ledcSetup(0, 1000, 8);
+  //ledcSetup(0, 1000, 8);
   ledcSetup(1, 10000, 8);
   ledcSetup(2, 10000, 8);
   ledcSetup(3, 10000, 8);
   ledcSetup(4, 10000, 8);
 
-  ledcAttachPin(GP3, 0);
+  //ledcAttachPin(GP3, 0);
   ledcAttachPin(R, 1);
   ledcAttachPin(G, 2);
   ledcAttachPin(B, 3);
@@ -53,24 +52,8 @@ if (EEPROM.begin(EEPROM_SIZE))
   pinMode(W ,OUTPUT);
   pinMode(F1 ,OUTPUT);
   pinMode(F2 ,OUTPUT);
-  pinMode(GP3 ,OUTPUT);
+  //pinMode(GP3 ,OUTPUT);
   pinMode(Beeper ,OUTPUT);
-
-  pinMode(GP4 ,INPUT_PULLUP);  
-
-  attachInterrupt(GP4, isr, FALLING);
-
-for(int i =0; i< 3000; i++){
-
-  ledcWrite(0, brightness);
-  brightness = brightness + fadeAmount; 
-  if (brightness <= 0 || brightness >= 255) {
-    fadeAmount = -fadeAmount;
-  }
-delayMicroseconds(400);
- //delay(1);  
-}
-  delay(100);
   
   if(ota){
      xTaskCreate(
@@ -81,30 +64,14 @@ delayMicroseconds(400);
                     1,               
                     NULL);
   }
-  xTaskCreate(
+  /*xTaskCreate(
                     TempRead,          
                     "TempRead",        
                     8000,            
                     NULL,             
                     1,               
-                    NULL);           
-  
-  xTaskCreate(
-                    OLED,          
-                    "OLED",        
-                    10000,            
-                    NULL,             
-                    1,               
-                    NULL); 
-  
- 
-  xTaskCreate(
-                    DisplayOut,          /* Task function. */
-                    "DisplayOut",        /* String with name of task. */
-                    10000,            /* Stack size in bytes. */
-                    NULL,             /* Parameter passed as input of the task */
-                    1,                /* Priority of the task. */
-                    NULL);            /* Task handle. */
+                    NULL);           */
+    
   if(!ota){
   xTaskCreate(
                     BLE,          
@@ -142,14 +109,14 @@ delayMicroseconds(400);
   xTaskCreate(
                     HeaterCtrl,          /* Task function. */
                     "HeaterCtrl",        /* String with name of task. */
-                    10000,            /* Stack size in bytes. */
+                    1000,            /* Stack size in bytes. */
                     NULL,             /* Parameter passed as input of the task */
                     1,                /* Priority of the task. */
                     NULL);            /* Task handle. */
 
   xTaskCreate(
-                    RTC,          
-                    "RTC",        
+                    I2C,          
+                    "I2C",        
                     10000,           
                     NULL,             
                     1,                
@@ -171,13 +138,13 @@ delayMicroseconds(400);
                     1,                /* Priority of the task. */
                     NULL);            /* Task handle. */
 
-    xTaskCreate(
-                    led,          /* Task function. */
-                    "led",        /* String with name of task. */
-                    5000,            /* Stack size in bytes. */
-                    NULL,             /* Parameter passed as input of the task */
-                    1,                /* Priority of the task. */
-                    NULL);            /* Task handle. */
+   // xTaskCreate(
+     //               led,          /* Task function. */
+       //             "led",        /* String with name of task. */
+         //           1000,            /* Stack size in bytes. */
+           //         NULL,             /* Parameter passed as input of the task */
+             //       1,                /* Priority of the task. */
+               //     NULL);            /* Task handle. */
     
 }
 

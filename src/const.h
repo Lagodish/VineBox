@@ -2,8 +2,8 @@
 
 //PWM setup
 const int freq = 5000;
-const int ledChannel = 0;
-const int resolution = 10; //Resolution 8, 10, 12, 15
+const uint8_t ledChannel = 0;
+const uint8_t resolution = 10; //Resolution 8, 10, 12, 15
 
 //Light
 uint8_t fadeAmount = 1;    // how many points to fade the LED by
@@ -35,12 +35,12 @@ uint8_t zone_2_1_n = 0;
 uint8_t zone_2_2_n = 0;
 
 //RTC
-int h_rtc = 0;
-int min_rtc = 0;
-int sec_rtc = 0;
-int d_rtc = 0;
-int m_rtc = 0;
-int y_rtc = 0;
+uint8_t h_rtc = 0;
+uint8_t min_rtc = 0;
+uint8_t sec_rtc = 0;
+uint8_t d_rtc = 0;
+uint8_t m_rtc = 0;
+uint8_t y_rtc = 0;
 double temp_rtc = 0;
 
 //i2c
