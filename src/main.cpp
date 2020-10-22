@@ -2,14 +2,11 @@
 #include <pins.h>
 #include <const.h>
 #include <tasks.h>
-
+#include <config.h>
 
 void setup() {
 
   Serial.begin(115200); //Uart
-  Serial1.begin(115200); //Displayt  
-
-  Serial1.println("Boot...");
 
 if (EEPROM.begin(EEPROM_SIZE))
   {
@@ -32,15 +29,11 @@ if (EEPROM.begin(EEPROM_SIZE))
     }
   }
 
-  
-
-  //ledcSetup(0, 1000, 8);
   ledcSetup(1, 10000, 8);
   ledcSetup(2, 10000, 8);
   ledcSetup(3, 10000, 8);
   ledcSetup(4, 10000, 8);
 
-  //ledcAttachPin(GP3, 0);
   ledcAttachPin(R, 1);
   ledcAttachPin(G, 2);
   ledcAttachPin(B, 3);
@@ -52,7 +45,6 @@ if (EEPROM.begin(EEPROM_SIZE))
   pinMode(W ,OUTPUT);
   pinMode(F1 ,OUTPUT);
   pinMode(F2 ,OUTPUT);
-  //pinMode(GP3 ,OUTPUT);
   pinMode(Beeper ,OUTPUT);
   
   if(ota){
@@ -137,18 +129,8 @@ if (EEPROM.begin(EEPROM_SIZE))
                     NULL,             /* Parameter passed as input of the task */
                     1,                /* Priority of the task. */
                     NULL);            /* Task handle. */
-
-   // xTaskCreate(
-     //               led,          /* Task function. */
-       //             "led",        /* String with name of task. */
-         //           1000,            /* Stack size in bytes. */
-           //         NULL,             /* Parameter passed as input of the task */
-             //       1,                /* Priority of the task. */
-               //     NULL);            /* Task handle. */
-    
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
-    vTaskDelay(1000);
+   vTaskDelete( NULL );
 }

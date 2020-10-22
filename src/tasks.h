@@ -16,44 +16,22 @@ U8G2_SH1106_128X64_NONAME_1_HW_I2C u8g2(U8G2_R0, /* reset=*/ U8X8_PIN_NONE);
 RtcDS3231<TwoWire> Rtc(Wire);
 
 void IRAM_ATTR resetModule() {
- // ets_printf("reboot\n");
   esp_restart();
 }
 
 void Light( void * parameter )
 {
      Serial.println("Light");
-        /*
-    ledcAttachPin(GP3, 0);
-    ledcAttachPin(R, 1);
-    ledcAttachPin(G, 2);
-    ledcAttachPin(B, 3);
-    ledcAttachPin(W, 4);
-        */
-
-    brt = briMIN;
+ 
 
     while(1){
 
-        ledcWrite(3, briB);
-        ledcWrite(1, briR);
-        ledcWrite(2, briG);
-        if(fade){
-   brt = brt + step; 
+        ledcWrite(3, 0); //briB
+        ledcWrite(1, 0); //briR
+        ledcWrite(2, 0); //briG
+        ledcWrite(4, 0); //brt
 
-   if (brt <= briMIN || brt >= briMAX) {
-        step = -step;
-        }
-
-     ledcWrite(4, brt);
-     
-        }
-        else{
-             ledcWrite(4, briW);
-        }
-       
-
-        vTaskDelay(50);    
+        vTaskDelay(1000);    
 
     }
 
@@ -65,24 +43,19 @@ void Light( void * parameter )
 void TempRead( void * parameter)
 {
     Serial.println("TempRead");
-    // Setup a oneWire instance to communicate with any OneWire devices
-    OneWire oneWire(oneWireBus);
-    // Pass our oneWire reference to Dallas Temperature sensor 
-    DallasTemperature sensors(&oneWire);
-    // We'll use this variable to store a found device address
-    DeviceAddress tempDeviceAddress; 
-    // Start the DS18B20 sensor
-    sensors.begin();
+    OneWire oneWire(oneWireBus);// Setup a oneWire instance to communicate with any OneWire devices
+    DallasTemperature sensors(&oneWire);// Pass our oneWire reference to Dallas Temperature sensor 
+    DeviceAddress tempDeviceAddress; // We'll use this variable to store a found device address
+    sensors.begin();// Start the DS18B20 sensor
     vTaskDelay(100);
   
     while(1){
-sensors.requestTemperatures();
+    sensors.requestTemperatures();
     for(int i=0;i<numberOfDevices; i++){
         tempC[i]=0;
-    // Search the wire for address
-    if(sensors.getAddress(tempDeviceAddress, i)){
-      // Print the data
-      tempC[i] = sensors.getTempC(tempDeviceAddress);
+    
+    if(sensors.getAddress(tempDeviceAddress, i)){// Search the wire for address
+      tempC[i] = sensors.getTempC(tempDeviceAddress);// Print the data
       Serial.print("Temp[");
       Serial.print(i);
       Serial.print("]: ");
@@ -91,12 +64,8 @@ sensors.requestTemperatures();
       Serial.println("");
      // Serial.print(" Temp F: ");
      // Serial.println(DallasTemperature::toFahrenheit(tempC)); // Converts tempC to Fahrenheit
-    }
-
-        
-  }
+    }}
     vTaskDelay(5000);
-        
     }
 
     Serial.println("Ending TempRead");
@@ -120,8 +89,6 @@ void set_time(int h,int min){
 
 void BLE( void * parameter)
 {
-  
-
     uint64_t chipid; 
     chipid=ESP.getEfuseMac();
     Serial.printf("ESP32 Chip ID = %04X",(uint16_t)(chipid>>32));
@@ -135,9 +102,6 @@ void BLE( void * parameter)
 
 
     while(1){ 
-
-
-
     if (ESP_BT.available()) {
         
         String str = ESP_BT.readString();
@@ -500,7 +464,6 @@ void HeaterCtrl( void * parameter)
 void I2C( void * parameter)
 {
     Serial.println("I2C");
-    u8g2.begin();
 /*
     int counter = 0;
     
@@ -594,35 +557,7 @@ void Static( void * parameter)
 
     while(1){
 
-    if(err_flag){
-        err_delay = 1;
-    }
-    else{
-        err_delay = def_time;
-    }
-
-    if(button){
-
-        button = false;
-
-        if (EEPROM.begin(EEPROM_SIZE))
-            {
-            EEPROM.write(ota_e,true);
-            EEPROM.commit();
-            vTaskDelay(100);
-            resetModule();
-        }
-
-    }
-
-    if(march){
-
-        march = false;
-
-    }
-
     vTaskDelay(1000);
-    
     }
 
     Serial.println("Ending Static");
@@ -632,37 +567,10 @@ void Static( void * parameter)
 void led( void * parameter)
 {
     Serial.println("led");
-    int i=0;
-    int y=0;
-    int z=255;
 
     while(1){
-    if(!ota){
 
-    brightness = brightness + fadeAmount; 
-    if (brightness <= 0 || brightness >= 255) {
-     fadeAmount = -fadeAmount;
-     }
-    vTaskDelay(err_delay); 
-  //  ledcWrite(0, brightness);  
-    
-    }
-    else{
-            for(i=0;i < 3; i++){
-                for(y=0; y < 256; y++){
-                  //  ledcWrite(0, y);  
-                    vTaskDelay(1); 
-                }
-
-                for(z=255; z > -1; z--){
-                //    ledcWrite(0, z); 
-                    vTaskDelay(1); 
-                }                
-            }
-            vTaskDelay(1000); 
-    } 
-        
-
+    vTaskDelay(1000);
     }
 
     Serial.println("Ending led");
@@ -714,9 +622,7 @@ void ServerOTA( void * parameter)
             EEPROM.write(ts_e,true);
             EEPROM.commit();
             Serial.println("\nOTA off!");
-            }
-//vTaskDelay(2000); 
- ///       
+            }     
       Serial.println("End");
     })
     .onProgress([](unsigned int progress, unsigned int total) {
@@ -737,13 +643,9 @@ void ServerOTA( void * parameter)
   Serial.print("IP address: ");
   Serial.println(WiFi.localIP());
 
-
-
     while(1){
-
     ArduinoOTA.handle();
-    vTaskDelay(100);    
-
+    vTaskDelay(3000);
     }
 
     Serial.println("Ending ServerOTA");
