@@ -593,15 +593,15 @@ void DisplayTask( void * parameter)
     while(1){
        
     //butt1.tick();
-  //butt2.tick();
-  //butt3.tick();
-  //butt4.tick();
-  if (butt1.isClick()){butt1_l = true;nav.doNav(enterCmd);Serial.println("enterCmd");}else{butt1_l = false;}
-  if (butt2.isClick()){butt2_l = true;nav.doNav(upCmd);Serial.println("upCmd");}else{butt2_l = false;}
-  if (butt3.isClick()){butt3_l = true;nav.doNav(downCmd);Serial.println("downCmd");} else{butt3_l = false;}
-  if (butt4.isClick()){butt4_l = true;nav.doNav(escCmd);Serial.println("escCmd");} else{butt4_l = false;}
+    //butt2.tick();
+    //butt3.tick();
+    //butt4.tick();
+    if (butt1.isClick()){butt1_l = true;nav.doNav(enterCmd);Serial.println("enterCmd");}else{butt1_l = false;}
+    if (butt2.isClick()){butt2_l = true;nav.doNav(upCmd);Serial.println("upCmd");}else{butt2_l = false;}
+    if (butt3.isClick()){butt3_l = true;nav.doNav(downCmd);Serial.println("downCmd");} else{butt3_l = false;}
+    if (butt4.isClick()){butt4_l = true;nav.doNav(escCmd);Serial.println("escCmd");} else{butt4_l = false;}
   
-  if(mainScreenOn&&(butt2_l||butt2.isStep())){
+    if(mainScreenOn&&(butt2_l||butt2.isStep())){
 
     if(Temp_mode){
     setted_temp+=0.5;
