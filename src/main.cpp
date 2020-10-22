@@ -35,15 +35,8 @@ void setup() {
                     NULL,             
                     1,               
                     NULL);
-  }
-  xTaskCreate(
-                    TempRead,          
-                    "TempRead",        
-                    8000,            
-                    NULL,             
-                    1,               
-                    NULL);           
-  xTaskCreate(
+
+      xTaskCreate(
                     LightCtrlTask,          /* Task function. */
                     "Light",        /* String with name of task. */
                     5000,            /* Stack size in bytes. */
@@ -78,22 +71,15 @@ void setup() {
   xTaskCreate(
                     RtcTask,          
                     "RTC",        
-                    10000,           
-                    NULL,             
-                    1,                
-                    NULL);
-    xTaskCreate(
-                    DisplayTask,          
-                    "Display",        
-                    10000,           
+                    1000,           
                     NULL,             
                     1,                
                     NULL);
 
-    xTaskCreate(
+      xTaskCreate(
                     Wdt,          /* Task function. */
                     "Wdt",        /* String with name of task. */
-                    4000,            /* Stack size in bytes. */
+                    1000,            /* Stack size in bytes. */
                     NULL,             /* Parameter passed as input of the task */
                     1,                /* Priority of the task. */
                     NULL);            /* Task handle. */
@@ -101,10 +87,30 @@ void setup() {
     xTaskCreate(
                     StaticTask,          /* Task function. */
                     "Static",        /* String with name of task. */
-                    4000,            /* Stack size in bytes. */
+                    1000,            /* Stack size in bytes. */
                     NULL,             /* Parameter passed as input of the task */
                     1,                /* Priority of the task. */
                     NULL);            /* Task handle. */
+  }
+
+  xTaskCreate(
+                    TempRead,          
+                    "TempRead",        
+                    8000,            
+                    NULL,             
+                    1,               
+                    NULL);           
+  
+   xTaskCreatePinnedToCore(
+    DisplayTask,             /* Task function. */
+    "DisplayTask",           /* String with name of task. */
+    10000,            /* Stack size in bytes. */
+    NULL,             /* Parameter passed as input of the task */
+    1,                /* Priority of the task. */
+    NULL,           /* Task handle. */
+    1);               /* Core 1 */ 
+
+    
 }
 
 void loop() {

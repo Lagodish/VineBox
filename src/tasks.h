@@ -2,9 +2,7 @@
 #include <pins.h>
 #include <OneWire.h>
 #include <DallasTemperature.h>
-#include <RtcDS3231.h>
-#include <Wire.h>
-#include <U8g2lib.h>
+//#include <RtcDS3231.h>
 #include <WiFi.h>
 #include <ESPmDNS.h>
 #include <WiFiUdp.h>
@@ -13,7 +11,7 @@
 #include <display.h>
 
 
-RtcDS3231<TwoWire> Rtc(Wire);
+//RtcDS3231<TwoWire> Rtc(Wire);
 
 void IRAM_ATTR resetModule() {
   esp_restart();
@@ -71,7 +69,7 @@ void TempRead( void * parameter)
     Serial.println("Ending TempRead");
     vTaskDelete( NULL );
 }
-
+/*
 void set_time(int h,int min){
     char userTime[8];
   userTime[0] = h / 10 + '0';
@@ -85,7 +83,7 @@ void set_time(int h,int min){
   RtcDateTime manual = RtcDateTime(__DATE__, userTime);
   Rtc.SetDateTime(manual);
 
-}
+}*/
 /*
 void BLE( void * parameter)
 {
@@ -593,12 +591,11 @@ void DisplayTask( void * parameter)
   nav.idleOn(MainScreen);
 
     while(1){
-    vTaskDelay(100);
-    /*
-    butt1.tick();
-  butt2.tick();
-  butt3.tick();
-  butt4.tick();
+       
+    //butt1.tick();
+  //butt2.tick();
+  //butt3.tick();
+  //butt4.tick();
   if (butt1.isClick()){butt1_l = true;nav.doNav(enterCmd);Serial.println("enterCmd");}else{butt1_l = false;}
   if (butt2.isClick()){butt2_l = true;nav.doNav(upCmd);Serial.println("upCmd");}else{butt2_l = false;}
   if (butt3.isClick()){butt3_l = true;nav.doNav(downCmd);Serial.println("downCmd");} else{butt3_l = false;}
@@ -626,7 +623,7 @@ void DisplayTask( void * parameter)
 
     showTemp=true;
     timer_1=1;}
-*/
+
   nav.doInput();
   //if (nav.changed(0)) {
     int contrast = map(BRT_Disp, 0, 100, 0, 190);
@@ -639,6 +636,8 @@ void DisplayTask( void * parameter)
   //}
   if(showTemp){timer_1++;if(timer_1>101){timer_1=0;showTemp=false;}}
   else{timer_1=0;showTemp=false;}
+
+     vTaskDelay(100);
     }
 
     Serial.println("Ending Display");
