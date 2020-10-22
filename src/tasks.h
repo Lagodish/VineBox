@@ -2,7 +2,6 @@
 #include <pins.h>
 #include <OneWire.h>
 #include <DallasTemperature.h>
-#include "BluetoothSerial.h"
 #include <RtcDS3231.h>
 #include <Wire.h>
 #include <U8g2lib.h>
@@ -10,16 +9,17 @@
 #include <ESPmDNS.h>
 #include <WiFiUdp.h>
 #include <ArduinoOTA.h>
-#include "EEPROM.h"
+#include <EEPROM.h>
+#include <display.h>
 
-U8G2_SH1106_128X64_NONAME_1_HW_I2C u8g2(U8G2_R0, /* reset=*/ U8X8_PIN_NONE);
+
 RtcDS3231<TwoWire> Rtc(Wire);
 
 void IRAM_ATTR resetModule() {
   esp_restart();
 }
 
-void Light( void * parameter )
+void LightCtrlTask( void * parameter )
 {
      Serial.println("Light");
  
@@ -51,7 +51,7 @@ void TempRead( void * parameter)
   
     while(1){
     sensors.requestTemperatures();
-    for(int i=0;i<numberOfDevices; i++){
+    for(int i=0;i<=numberOfDevices; i++){
         tempC[i]=0;
     
     if(sensors.getAddress(tempDeviceAddress, i)){// Search the wire for address
@@ -86,7 +86,7 @@ void set_time(int h,int min){
   Rtc.SetDateTime(manual);
 
 }
-
+/*
 void BLE( void * parameter)
 {
     uint64_t chipid; 
@@ -422,8 +422,8 @@ void BLE( void * parameter)
     Serial.println("Ending BLE");
     vTaskDelete( NULL );
 }
-
-void CompCtrl( void * parameter)
+*/
+void CompCtrlTask( void * parameter)
 {
     Serial.println("CompCtrl");
     while(1){
@@ -435,7 +435,7 @@ void CompCtrl( void * parameter)
     vTaskDelete( NULL );
 }
 
-void FanCtrl( void * parameter)
+void FanCtrlTask( void * parameter)
 {
     Serial.println("FanCtrl");
     while(1){
@@ -447,7 +447,7 @@ void FanCtrl( void * parameter)
     vTaskDelete( NULL );
 }
 
-void HeaterCtrl( void * parameter)
+void HeaterCtrlTask( void * parameter)
 {
     Serial.println("HeaterCtrl");
     while(1){
@@ -461,9 +461,9 @@ void HeaterCtrl( void * parameter)
     vTaskDelete( NULL );
 }
 
-void I2C( void * parameter)
+void RtcTask( void * parameter)
 {
-    Serial.println("I2C");
+    Serial.println("RTC");
 /*
     int counter = 0;
     
@@ -551,7 +551,7 @@ void Wdt( void * parameter)
     vTaskDelete( NULL );
 }
 
-void Static( void * parameter)
+void StaticTask( void * parameter)
 {
     Serial.println("Static");
 
@@ -564,16 +564,84 @@ void Static( void * parameter)
     vTaskDelete( NULL );
 }
 
-void led( void * parameter)
+void DisplayTask( void * parameter)
 {
-    Serial.println("led");
+    Serial.println("Display");
 
-    while(1){
-
-    vTaskDelay(1000);
+    Wire.begin();
+    u8g2.begin();
+    u8g2.enableUTF8Print();	
+    if (EEPROM.begin(EEPROM_SIZE)){
+    delay(10);
+    BRT_Disp = EEPROM.read(0);
+    BRT_max = EEPROM.read(1);
+    SPD_max = EEPROM.read(2);
+    PERF = EEPROM.read(3);
+    setted_temp = EEPROM.read(4);
+    Temp_mode = EEPROM.read(5);
+    LightCtrl = EEPROM.read(6);
+    FanCtrl = EEPROM.read(7);
+    Silence = EEPROM.read(8);
+    Wireless = EEPROM.read(9);
     }
 
-    Serial.println("Ending led");
+  u8g2.setFont(fontName);
+  // u8g2.setBitmapMode(0);
+  //mainMenu[1].enabled=disabledStatus; //disable second option
+  nav.idleTask=MainScreen;//point a function to be used when menu is suspended
+  nav.timeOut=30;
+  nav.idleOn(MainScreen);
+
+    while(1){
+    vTaskDelay(100);
+    /*
+    butt1.tick();
+  butt2.tick();
+  butt3.tick();
+  butt4.tick();
+  if (butt1.isClick()){butt1_l = true;nav.doNav(enterCmd);Serial.println("enterCmd");}else{butt1_l = false;}
+  if (butt2.isClick()){butt2_l = true;nav.doNav(upCmd);Serial.println("upCmd");}else{butt2_l = false;}
+  if (butt3.isClick()){butt3_l = true;nav.doNav(downCmd);Serial.println("downCmd");} else{butt3_l = false;}
+  if (butt4.isClick()){butt4_l = true;nav.doNav(escCmd);Serial.println("escCmd");} else{butt4_l = false;}
+  
+  if(mainScreenOn&&(butt2_l||butt2.isStep())){
+
+    if(Temp_mode){
+    setted_temp+=0.5;
+    if(setted_temp>18){setted_temp=18;}}
+    else{
+    setted_temp+=1;
+    if(setted_temp>64){setted_temp=64;}}
+
+    showTemp=true;
+    timer_1=1;}
+  if(mainScreenOn&&(butt3_l||butt3.isStep())){
+
+    if(Temp_mode){
+    setted_temp-=0.5;
+    if(setted_temp<5){setted_temp=5;}}
+    else{
+    setted_temp-=1;
+    if(setted_temp<41){setted_temp=41;}}
+
+    showTemp=true;
+    timer_1=1;}
+*/
+  nav.doInput();
+  //if (nav.changed(0)) {
+    int contrast = map(BRT_Disp, 0, 100, 0, 190);
+    u8g2.setContrast(contrast);
+    u8g2.firstPage();
+    do nav.doOutput(); while(u8g2.nextPage());
+
+    blink++;
+  if(blink>=100){blink=0;}
+  //}
+  if(showTemp){timer_1++;if(timer_1>101){timer_1=0;showTemp=false;}}
+  else{timer_1=0;showTemp=false;}
+    }
+
+    Serial.println("Ending Display");
     vTaskDelete( NULL );
 }
 
