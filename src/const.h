@@ -90,3 +90,5 @@ bool march = false;
 String err_str = "";
 uint8_t def_time = 6;
 uint8_t err_delay = def_time;
+
+double temp_cache = 0.0;

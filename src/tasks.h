@@ -45,13 +45,11 @@ void TempRead( void * parameter)
     DallasTemperature sensors(&oneWire);// Pass our oneWire reference to Dallas Temperature sensor 
     DeviceAddress tempDeviceAddress; // We'll use this variable to store a found device address
     sensors.begin();// Start the DS18B20 sensor
-    vTaskDelay(100);
   
     while(1){
     sensors.requestTemperatures();
     for(int i=0;i<=numberOfDevices; i++){
-        tempC[i]=0;
-    
+    tempC[i]=0;
     if(sensors.getAddress(tempDeviceAddress, i)){// Search the wire for address
       tempC[i] = sensors.getTempC(tempDeviceAddress);// Print the data
       Serial.print("Temp[");
@@ -60,10 +58,11 @@ void TempRead( void * parameter)
       Serial.print(tempC[i]);
       Serial.print(" C");
       Serial.println("");
+      //temp_cache=temp_cache+tempC[i];
      // Serial.print(" Temp F: ");
      // Serial.println(DallasTemperature::toFahrenheit(tempC)); // Converts tempC to Fahrenheit
     }}
-    vTaskDelay(5000);
+    vTaskDelay(1000/portTICK_PERIOD_MS);
     }
 
     Serial.println("Ending TempRead");
@@ -583,61 +582,55 @@ void DisplayTask( void * parameter)
     Wireless = EEPROM.read(9);
     }
 
-  u8g2.setFont(fontName);
-  // u8g2.setBitmapMode(0);
-  //mainMenu[1].enabled=disabledStatus; //disable second option
-  nav.idleTask=MainScreen;//point a function to be used when menu is suspended
-  nav.timeOut=30;
-  nav.idleOn(MainScreen);
+    u8g2.setFont(fontName);
+    // u8g2.setBitmapMode(0);
+    //mainMenu[1].enabled=disabledStatus; //disable second option
+    nav.idleTask=MainScreen;//point a function to be used when menu is suspended
+    nav.timeOut=30;
+    nav.idleOn(MainScreen);
 
-    while(1){
-       
+    while(1){       
     //butt1.tick();
     //butt2.tick();
     //butt3.tick();
     //butt4.tick();
+    temp_cache=tempC[numberOfDevices];
+    
     if (butt1.isClick()){butt1_l = true;nav.doNav(enterCmd);Serial.println("enterCmd");}else{butt1_l = false;}
     if (butt2.isClick()){butt2_l = true;nav.doNav(upCmd);Serial.println("upCmd");}else{butt2_l = false;}
     if (butt3.isClick()){butt3_l = true;nav.doNav(downCmd);Serial.println("downCmd");} else{butt3_l = false;}
     if (butt4.isClick()){butt4_l = true;nav.doNav(escCmd);Serial.println("escCmd");} else{butt4_l = false;}
   
     if(mainScreenOn&&(butt2_l||butt2.isStep())){
-
     if(Temp_mode){
     setted_temp+=0.5;
     if(setted_temp>18){setted_temp=18;}}
     else{
     setted_temp+=1;
     if(setted_temp>64){setted_temp=64;}}
+    showTemp=true;timer_1=1;}
 
-    showTemp=true;
-    timer_1=1;}
-  if(mainScreenOn&&(butt3_l||butt3.isStep())){
-
-    if(Temp_mode){
+    if(mainScreenOn&&(butt3_l||butt3.isStep())){if(Temp_mode){
     setted_temp-=0.5;
     if(setted_temp<5){setted_temp=5;}}
     else{
     setted_temp-=1;
     if(setted_temp<41){setted_temp=41;}}
+    showTemp=true;timer_1=1;}
 
-    showTemp=true;
-    timer_1=1;}
-
-  nav.doInput();
-  //if (nav.changed(0)) {
+    nav.doInput();
+    //if (nav.changed(0)) {
     int contrast = map(BRT_Disp, 0, 100, 0, 190);
     u8g2.setContrast(contrast);
     u8g2.firstPage();
     do nav.doOutput(); while(u8g2.nextPage());
 
     blink++;
-  if(blink>=100){blink=0;}
-  //}
-  if(showTemp){timer_1++;if(timer_1>101){timer_1=0;showTemp=false;}}
-  else{timer_1=0;showTemp=false;}
-
-     vTaskDelay(100);
+    if(blink>=100){blink=0;}
+    //}
+    if(showTemp){timer_1++;if(timer_1>101){timer_1=0;showTemp=false;}}
+    else{timer_1=0;showTemp=false;}
+    vTaskDelay(30/portTICK_PERIOD_MS);
     }
 
     Serial.println("Ending Display");

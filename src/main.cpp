@@ -4,6 +4,7 @@
 #include <tasks.h>
 
 
+
 void setup() {
 
   Serial.begin(115200); //Uart
@@ -27,90 +28,91 @@ void setup() {
   pinMode(F2 ,OUTPUT);
   pinMode(Beeper ,OUTPUT);
   
-  if(ota){
-     xTaskCreate(
-                    ServerOTA,          
-                    "ServerOTA",        
-                    8000,            
-                    NULL,             
-                    1,               
-                    NULL);
+   if(ota){
+   xTaskCreate(
+      ServerOTA,          
+      "ServerOTA",        
+      8000,            
+      NULL,             /* Parameter passed as input of the task */          
+      1,                /* Priority of the task. */           
+      NULL);}            /* Task handle. */
+   
+   xTaskCreate(
+      LightCtrlTask,
+      "Light",
+      5000,
+      NULL,             /* Parameter passed as input of the task */
+      1,                /* Priority of the task. */
+      NULL);            /* Task handle. */
 
-      xTaskCreate(
-                    LightCtrlTask,          /* Task function. */
-                    "Light",        /* String with name of task. */
-                    5000,            /* Stack size in bytes. */
-                    NULL,             /* Parameter passed as input of the task */
-                    1,                /* Priority of the task. */
-                    NULL);            /* Task handle. */
+   xTaskCreate(
+      CompCtrlTask,
+      "CompCtrl",
+      3000,
+      NULL,             /* Parameter passed as input of the task */
+      1,                /* Priority of the task. */
+      NULL);            /* Task handle. */
 
-  xTaskCreate(
-                    CompCtrlTask,          /* Task function. */
-                    "CompCtrl",        /* String with name of task. */
-                    3000,            /* Stack size in bytes. */
-                    NULL,             /* Parameter passed as input of the task */
-                    1,                /* Priority of the task. */
-                    NULL);            /* Task handle. */
+   xTaskCreate(
+      FanCtrlTask,
+      "FanCtrl",
+      3000,
+      NULL,             /* Parameter passed as input of the task */
+      1,                /* Priority of the task. */
+      NULL);            /* Task handle. */
 
-  xTaskCreate(
-                    FanCtrlTask,          /* Task function. */
-                    "FanCtrl",        /* String with name of task. */
-                    3000,            /* Stack size in bytes. */
-                    NULL,             /* Parameter passed as input of the task */
-                    1,                /* Priority of the task. */
-                    NULL);            /* Task handle. */
+   xTaskCreate(
+      HeaterCtrlTask,
+      "HeaterCtrl",
+      1000,
+      NULL,             /* Parameter passed as input of the task */
+      1,                /* Priority of the task. */
+      NULL);            /* Task handle. */
 
-  xTaskCreate(
-                    HeaterCtrlTask,          /* Task function. */
-                    "HeaterCtrl",        /* String with name of task. */
-                    1000,            /* Stack size in bytes. */
-                    NULL,             /* Parameter passed as input of the task */
-                    1,                /* Priority of the task. */
-                    NULL);            /* Task handle. */
+   xTaskCreate(
+      RtcTask,          
+      "RTC",        
+      1000,           
+      NULL,             /* Parameter passed as input of the task */         
+      1,                /* Priority of the task. */               
+      NULL);            /* Task handle. */
 
-  xTaskCreate(
-                    RtcTask,          
-                    "RTC",        
-                    1000,           
-                    NULL,             
-                    1,                
-                    NULL);
+   xTaskCreate(
+      Wdt,
+      "Wdt",
+      1000,
+      NULL,             /* Parameter passed as input of the task */
+      1,                /* Priority of the task. */
+      NULL);            /* Task handle. */
 
-      xTaskCreate(
-                    Wdt,          /* Task function. */
-                    "Wdt",        /* String with name of task. */
-                    1000,            /* Stack size in bytes. */
-                    NULL,             /* Parameter passed as input of the task */
-                    1,                /* Priority of the task. */
-                    NULL);            /* Task handle. */
-
-    xTaskCreate(
-                    StaticTask,          /* Task function. */
-                    "Static",        /* String with name of task. */
-                    1000,            /* Stack size in bytes. */
-                    NULL,             /* Parameter passed as input of the task */
-                    1,                /* Priority of the task. */
-                    NULL);            /* Task handle. */
-  }
-
-  xTaskCreate(
-                    TempRead,          
-                    "TempRead",        
-                    8000,            
-                    NULL,             
-                    1,               
-                    NULL);           
+   xTaskCreate(
+      StaticTask,
+      "Static",
+      1000,
+      NULL,             /* Parameter passed as input of the task */
+      1,                /* Priority of the task. */
+      NULL);            /* Task handle. */
   
-   xTaskCreatePinnedToCore(
-    DisplayTask,             /* Task function. */
-    "DisplayTask",           /* String with name of task. */
-    10000,            /* Stack size in bytes. */
-    NULL,             /* Parameter passed as input of the task */
-    1,                /* Priority of the task. */
-    NULL,           /* Task handle. */
-    1);               /* Core 1 */ 
 
-    
+   xTaskCreate(
+      TempRead,          
+      "TempRead",        
+      8000,            
+      NULL,             /* Parameter passed as input of the task */             
+      1,                /* Priority of the task. */        
+      NULL);            /* Task handle. */       
+   
+   delay(500);
+
+   xTaskCreatePinnedToCore(
+      DisplayTask,
+      "DisplayTask",
+      10000,
+      NULL,
+      1,              /* Priority of the task. */
+      NULL,           /* Task handle. */
+      1);             /* Core 1 */ 
+
 }
 
 void loop() {

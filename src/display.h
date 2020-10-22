@@ -189,8 +189,8 @@ result MainScreen(menuOut& o,idleEvent e) {
 
   if(showTemp){tempPrint = setted_temp;}
   else{
-    if(Temp_mode){tempPrint = tempC[0];}
-    else{tempPrint = int((tempC[0]*9/5)+32);}}
+    if(Temp_mode){tempPrint = temp_cache;}
+    else{tempPrint = int((temp_cache*9/5)+32);}}
   
   switch(e) {
     case idleStart:/*o.println("suspending menu!")*/;break;
@@ -220,7 +220,7 @@ result MainScreen(menuOut& o,idleEvent e) {
     if(Wireless==1){u8g2.drawUTF8(72, 64, wifi_SYMBOL);}
     if(Wireless==2){u8g2.drawUTF8(72, 64, bluetooth_SYMBOL);}
     //u8g2.drawUTF8(72, 64, SYMBOL);
-    if(!Hysteresis(tempC[0])){u8g2.drawUTF8(106, 64, ALERT_SYMBOL);}
+    if(!Hysteresis(temp_cache)){u8g2.drawUTF8(106, 64, ALERT_SYMBOL);}
     break;}
     case idleEnd:/*o.println("resuming menu.");*/mainScreenOn=false;u8g2.setFont(fontName);break;
   }
