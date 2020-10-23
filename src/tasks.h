@@ -49,7 +49,7 @@ void TempRead( void * parameter)
     while(1){
     sensors.requestTemperatures();
     for(int i=0;i<=numberOfDevices; i++){
-    tempC[i]=0;
+    //tempC[i]=0;
     if(sensors.getAddress(tempDeviceAddress, i)){// Search the wire for address
       tempC[i] = sensors.getTempC(tempDeviceAddress);// Print the data
       Serial.print("Temp[");
@@ -590,12 +590,13 @@ void DisplayTask( void * parameter)
     nav.idleOn(MainScreen);
 
     while(1){       
-    //butt1.tick();
-    //butt2.tick();
-    //butt3.tick();
-    //butt4.tick();
+    butt1.tick();
+    butt2.tick();
+    butt3.tick();
+    butt4.tick();
+
     temp_cache=tempC[numberOfDevices];
-    
+
     if (butt1.isClick()){butt1_l = true;nav.doNav(enterCmd);Serial.println("enterCmd");}else{butt1_l = false;}
     if (butt2.isClick()){butt2_l = true;nav.doNav(upCmd);Serial.println("upCmd");}else{butt2_l = false;}
     if (butt3.isClick()){butt3_l = true;nav.doNav(downCmd);Serial.println("downCmd");} else{butt3_l = false;}

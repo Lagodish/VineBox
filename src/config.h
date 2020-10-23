@@ -10,8 +10,8 @@
 //////////////////////  Config End    //////////////////////
 
 
-#define  language_RU 
-//#define language_EU
+//#define  language_RU 
+#define language_EU
 
 #ifdef language_EU
   #define text_1    "Settings"

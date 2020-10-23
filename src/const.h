@@ -16,8 +16,8 @@ int briMAX = 150;
 int briMIN = 10;
 
 //FAde
-       int brt = 0;
-       int step = 1;
+int brt = 0;
+int step = 1;
 
 //boot
 bool ota = false;

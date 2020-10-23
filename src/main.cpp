@@ -7,7 +7,7 @@
 
 void setup() {
 
-  Serial.begin(115200); //Uart
+  Serial.begin(9600); //Uart
   while(!Serial);
   
   ledcSetup(1, 10000, 8);
@@ -27,7 +27,9 @@ void setup() {
   pinMode(F1 ,OUTPUT);
   pinMode(F2 ,OUTPUT);
   pinMode(Beeper ,OUTPUT);
-  
+
+  disableCore0WDT();
+
    if(ota){
    xTaskCreate(
       ServerOTA,          
@@ -111,7 +113,7 @@ void setup() {
       NULL,
       1,              /* Priority of the task. */
       NULL,           /* Task handle. */
-      1);             /* Core 1 */ 
+      0);             /* Core 0 */ 
 
 }
 
