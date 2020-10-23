@@ -8,6 +8,7 @@
 void setup() {
 
   Serial.begin(9600); //Uart
+  Serial1.begin(9600); //Uart
   while(!Serial);
   
   ledcSetup(1, 10000, 8);
@@ -20,15 +21,12 @@ void setup() {
   ledcAttachPin(B, 3);
   ledcAttachPin(W, 4);
 
-  pinMode(R ,OUTPUT);
-  pinMode(G ,OUTPUT);
-  pinMode(B ,OUTPUT);
-  pinMode(W ,OUTPUT);
   pinMode(F1 ,OUTPUT);
   pinMode(F2 ,OUTPUT);
+  pinMode(Comp ,OUTPUT);
   pinMode(Beeper ,OUTPUT);
 
-  disableCore0WDT();
+  //disableCore0WDT();
 
    if(ota){
    xTaskCreate(

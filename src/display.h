@@ -168,12 +168,13 @@ MENU(mainMenu, text_1 ,doNothing,noEvent,noStyle
   ,EXIT(text_11)
 );
 
-serialIn serial(Serial);
-MENU_INPUTS(in,&serial);
+//serialIn serial(Serial1);
+//MENU_INPUTS(in, NONE);  //&serial
+chainStream<0> in(NULL);//<-- this creates a NULL stream
 
 MENU_OUTPUTS(out,MAX_DEPTH
   ,U8G2_OUT(u8g2,colors,fontX,fontY,offsetX,offsetY,{0,0,U8_Width/fontX,U8_Height/fontY})
-  ,SERIAL_OUT(Serial)
+  ,NONE//SERIAL_OUT(Serial1)
 );
 
 NAVROOT(nav,mainMenu,MAX_DEPTH,in,out);
@@ -220,7 +221,7 @@ result MainScreen(menuOut& o,idleEvent e) {
     if(Wireless==1){u8g2.drawUTF8(72, 64, wifi_SYMBOL);}
     if(Wireless==2){u8g2.drawUTF8(72, 64, bluetooth_SYMBOL);}
     //u8g2.drawUTF8(72, 64, SYMBOL);
-    if(!Hysteresis(temp_cache)){u8g2.drawUTF8(106, 64, ALERT_SYMBOL);}
+    if(Hysteresis(temp_cache)){u8g2.drawUTF8(106, 64, ALERT_SYMBOL);}
     break;}
     case idleEnd:/*o.println("resuming menu.");*/mainScreenOn=false;u8g2.setFont(fontName);break;
   }

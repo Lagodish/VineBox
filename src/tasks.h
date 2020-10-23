@@ -423,9 +423,15 @@ void BLE( void * parameter)
 void CompCtrlTask( void * parameter)
 {
     Serial.println("CompCtrl");
-    while(1){
-    vTaskDelay(1000);
+    while(temp_cache<5||temp_cache>64){
+    vTaskDelay(1000/portTICK_PERIOD_MS);
+    }
 
+    while(1){
+    digitalWrite(Comp,Hysteresis(temp_cache));//inveted pin
+    for(int i=0;i<180;i++){
+    vTaskDelay(1000/portTICK_PERIOD_MS);
+    }
     }
 
     Serial.println("Ending CompCtrl");
@@ -568,7 +574,24 @@ void DisplayTask( void * parameter)
     Wire.begin();
     u8g2.begin();
     u8g2.enableUTF8Print();	
+
     if (EEPROM.begin(EEPROM_SIZE)){
+    delay(10);
+    if(EEPROM.read(10)!=29){
+    EEPROM.write(0,50);     //BRT_Disp
+    EEPROM.write(1,80);     //BRT_max
+    EEPROM.write(2,80);     //SPD_max
+    EEPROM.write(3,1);     //PERF
+    EEPROM.write(4,16);     //setted_temp
+    EEPROM.write(5,HIGH);     //Temp_mode
+    EEPROM.write(6,HIGH);     //LightCtrl
+    EEPROM.write(7,HIGH);     //FanCtrl
+    EEPROM.write(8,HIGH);     //Silence
+    EEPROM.write(9,0);     //Wireless
+
+    EEPROM.write(10,29); //Test flag
+    EEPROM.commit();
+    }
     delay(10);
     BRT_Disp = EEPROM.read(0);
     BRT_max = EEPROM.read(1);
@@ -581,6 +604,7 @@ void DisplayTask( void * parameter)
     Silence = EEPROM.read(8);
     Wireless = EEPROM.read(9);
     }
+    
 
     u8g2.setFont(fontName);
     // u8g2.setBitmapMode(0);
@@ -629,7 +653,7 @@ void DisplayTask( void * parameter)
     blink++;
     if(blink>=100){blink=0;}
     //}
-    if(showTemp){timer_1++;if(timer_1>101){timer_1=0;showTemp=false;}}
+    if(showTemp){timer_1++;if(timer_1>101){timer_1=0;showTemp=false; EEPROM.write(4,setted_temp);EEPROM.commit();}}
     else{timer_1=0;showTemp=false;}
     vTaskDelay(30/portTICK_PERIOD_MS);
     }
