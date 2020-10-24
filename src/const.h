@@ -11,8 +11,8 @@ uint8_t briB = 0;
 uint8_t briW = 0;
 
 //boot
-bool ota = false;
-bool ts = false;
+bool ota = true;
+//bool ts = false;
 
 //DS18B20 setup
 const int oneWireBus = DS18B20;
@@ -69,3 +69,6 @@ uint8_t blink=0;
 double setted_temp = 16.0;
 double temp = 9.0;
 double tempPrint =0.0;
+
+#define SERVICE_UUID        "95e95e3e-6cd6-4bf1-8e65-8faca66d90b0"
+#define CHARACTERISTIC_UUID "6cefc71f-c7c1-4344-8610-1b5e6e1b0eda"

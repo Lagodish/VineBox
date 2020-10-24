@@ -8,6 +8,7 @@ void setup() {
    Serial.begin(9600); //Uart
    while(!Serial);
    i2c_mutex = xSemaphoreCreateMutex();
+   antenna_mutex = xSemaphoreCreateMutex();
 
    ledcSetup(1, freq, resolution);
    ledcSetup(2, freq, resolution);

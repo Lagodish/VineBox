@@ -72,6 +72,37 @@ const colorDef<uint8_t> colors[6] MEMMODE={
   {{1,1},{1,0,0}},//titleColor
 };
 
+result action6(eventMask e,navNode& nav, prompt &item) {
+  if(Wireless==0){    //No
+
+  }
+  if(Wireless==1){    //WiFi
+
+  }
+  if(Wireless==2){    //BLE
+    BLEDevice::init("Wine Cabinet");
+    BLEServer *pServer = BLEDevice::createServer();
+    BLEService *pService = pServer->createService(SERVICE_UUID);
+    BLECharacteristic *pCharacteristic = pService->createCharacteristic(
+                                         CHARACTERISTIC_UUID,
+                                         BLECharacteristic::PROPERTY_READ |
+                                         BLECharacteristic::PROPERTY_WRITE
+                                       );
+    pCharacteristic->setValue("@Lagodish");
+    pService->start();
+    // BLEAdvertising *pAdvertising = pServer->getAdvertising();  // this still is working for backward compatibility
+    BLEAdvertising *pAdvertising = BLEDevice::getAdvertising();
+    pAdvertising->addServiceUUID(SERVICE_UUID);
+    pAdvertising->setScanResponse(true);
+    pAdvertising->setMinPreferred(0x06);  // functions that help with iPhone connections issue
+    pAdvertising->setMinPreferred(0x12);
+    BLEDevice::startAdvertising();
+    //BLEDevice::deinit(true);
+
+  }
+  return proceed;
+}
+
 result action5(eventMask e,navNode& nav, prompt &item) {
     char userTime[8];
     userTime[0] = h_rtc / 10 + '0';
@@ -151,7 +182,7 @@ TOGGLE(Temp_mode,TempMenu,text_4,action2,enterEvent,noStyle
 TOGGLE(Wireless,setWireless,text_6,action1,enterEvent,noStyle
   ,VALUE(text_9,0,doNothing,noEvent)
   ,VALUE("WiFi",1,doNothing,noEvent)
-  ,VALUE("BLE",2,doNothing,noEvent)
+  ,VALUE("BLE",2,action6,enterEvent)
 );
 
 

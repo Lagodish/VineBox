@@ -6,11 +6,17 @@
 #include <ESPmDNS.h>
 #include <WiFiUdp.h>
 #include <ArduinoOTA.h>
+//BLE
+#include <BLEDevice.h>
+#include <BLEUtils.h>
+#include <BLEServer.h>
+//
 #include <Preferences.h> //TODO NVS
 Preferences preferences;
 #include <display.h>
 
 SemaphoreHandle_t i2c_mutex;
+SemaphoreHandle_t antenna_mutex;
 
 void IRAM_ATTR resetModule(){esp_restart();}
 
@@ -289,37 +295,25 @@ void DisplayTask( void * parameter)
 
 void ServerOTA( void * parameter)
 {
-  Serial.println("ServerOTA");
+    Serial.println("ServerOTA");
+    xSemaphoreTake(antenna_mutex, portMAX_DELAY);
+    WiFi.mode(WIFI_STA);
+    WiFi.begin(ssid, password);
 
-  WiFi.mode(WIFI_STA);
-  WiFi.begin(ssid, password);
-    //WiFi.setHostname("VineBox");
-  //  tcpip_adapter_set_hostname
-    
     while (WiFi.status() != WL_CONNECTED) {
-        vTaskDelay(1000);
-        Serial.print(".");
+        vTaskDelay(5000/portTICK_PERIOD_MS);
     }
+    ArduinoOTA.setPort(3232);
+    ArduinoOTA.setHostname("VineBoxOTA");
+    ArduinoOTA.setPassword("quZJU4KNywpHm9pS");
 
-  // Port defaults to 3232
-   ArduinoOTA.setPort(3232);
-
-   // char* name = "VineBox_" + String((uint16_t)(chipid>>32));
-  // Hostname defaults to esp3232-[MAC]
-   ArduinoOTA.setHostname("VineBoxOTA");
-   ArduinoOTA.setPassword("quZJU4KNywpHm9pS");
-
-    //Sets the password as above but in the form MD5(password). Default NULL
-    //ArduinoOTA.setPasswordHash(md5_);
-
-  ArduinoOTA
+    ArduinoOTA
     .onStart([]() {
       String type;
       if (ArduinoOTA.getCommand() == U_FLASH)
         type = "sketch";
       else // U_SPIFFS
         type = "filesystem";
-
       // NOTE: if updating SPIFFS this would be the place to unmount SPIFFS using SPIFFS.end()
       Serial.println("Start updating " + type);
     })
@@ -338,15 +332,16 @@ void ServerOTA( void * parameter)
       else if (error == OTA_END_ERROR) Serial.println("End Failed");
     });
 
-  ArduinoOTA.begin();
-
-  Serial.println("Ready");
-  Serial.print("IP address: ");
-  Serial.println(WiFi.localIP());
-
+    ArduinoOTA.begin();
+    Serial.println("");
+    Serial.print("IP address: ");
+    Serial.println(WiFi.localIP());
+    xSemaphoreGive(antenna_mutex);
     while(1){
+    xSemaphoreTake(antenna_mutex, portMAX_DELAY);
     ArduinoOTA.handle();
-    vTaskDelay(5000/portTICK_PERIOD_MS);
+    xSemaphoreGive(antenna_mutex);
+    vTaskDelay(1000/portTICK_PERIOD_MS);
     }
 
     Serial.println("Ending ServerOTA");
