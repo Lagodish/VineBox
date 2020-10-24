@@ -275,7 +275,7 @@ void DisplayTask( void * parameter)
 
     xSemaphoreTake(i2c_mutex, portMAX_DELAY);
     nav.doInput();
-    //if (nav.changed(0)) {
+    //if (nav.changed(0))
     int contrast = map(BRT_Disp, 0, 100, 0, 190);
     u8g2.setContrast(contrast);
     
@@ -334,8 +334,6 @@ void ServerOTA( void * parameter)
     
     if (EEPROM.begin(EEPROM_SIZE))
             {
-            EEPROM.write(ota_e,false);
-            EEPROM.write(ts_e,true);
             EEPROM.commit();
             Serial.println("\nOTA off!");
             }     
