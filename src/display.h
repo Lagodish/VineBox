@@ -9,6 +9,9 @@
 #include <GyverButton.h>
 #include <config.h>
 
+#include <RtcDS3231.h>
+RtcDS3231<TwoWire> Rtc(Wire);
+
 GButton butt1(GP1); //GButton touch(BTN_PIN, LOW_PULL, NORM_OPEN);
 GButton butt2(GP2);
 GButton butt3(GP3);
@@ -69,6 +72,21 @@ const colorDef<uint8_t> colors[6] MEMMODE={
   {{1,1},{1,0,0}},//titleColor
 };
 
+result action5(eventMask e,navNode& nav, prompt &item) {
+    char userTime[8];
+    userTime[0] = h_rtc / 10 + '0';
+    userTime[1] = h_rtc % 10 + '0';
+    userTime[2] = ':';
+    userTime[3] = min_rtc / 10 + '0';
+    userTime[4] = min_rtc % 10 + '0';
+    userTime[5] = ':';
+    userTime[6] = '0';
+    userTime[7] = '0';
+  
+    RtcDateTime manual = RtcDateTime(__DATE__, userTime);
+    Rtc.SetDateTime(manual);
+    return proceed;
+}
 
 result action4(eventMask e,navNode& nav, prompt &item) {
   preferences.begin("VineBoxData", false);
@@ -154,21 +172,14 @@ MENU(FanMenu,text_15,doNothing,noEvent,noStyle
   ,FIELD(SPD_max,text_17,"%",0,100,10,0,action1,enterEvent,wrapStyle)
   ,EXIT(text_11)
 );
- 
-PADMENU(YMD_Menu,text_14,doNothing,noEvent,noStyle
-  ,FIELD(y_rtc,"","/",1900,3000,20,1,doNothing,noEvent,noStyle)
-  ,FIELD(m_rtc,"","/",1,12,1,0,doNothing,noEvent,wrapStyle)
-  ,FIELD(d_rtc,"","",1,31,1,0,doNothing,noEvent,wrapStyle)
-);
 
 PADMENU(HM_Menu,text_13,doNothing,noEvent,noStyle
-  ,FIELD(h_rtc,"",":",0,23,1,0,doNothing,noEvent,wrapStyle)
-  ,FIELD(min_rtc,"","",0,59,1,0,doNothing,noEvent,wrapStyle)
+  ,FIELD(h_rtc,"",":",0,23,1,0,action5,enterEvent,wrapStyle)
+  ,FIELD(min_rtc,"","",0,59,1,0,action5,enterEvent,wrapStyle)
 );
 
 MENU(timeMenu,text_12,doNothing,noEvent,noStyle
   ,SUBMENU(HM_Menu)
-  ,SUBMENU(YMD_Menu)
   ,EXIT(text_11)
 );
 

@@ -2,7 +2,6 @@
 #include <pins.h>
 #include <OneWire.h>
 #include <DallasTemperature.h>
-#include <RtcDS3231.h>
 #include <WiFi.h>
 #include <ESPmDNS.h>
 #include <WiFiUdp.h>
@@ -11,8 +10,6 @@
 Preferences preferences;
 #include <display.h>
 
-
-RtcDS3231<TwoWire> Rtc(Wire);
 SemaphoreHandle_t i2c_mutex;
 
 void IRAM_ATTR resetModule(){esp_restart();}
@@ -99,20 +96,6 @@ void TempRead( void * parameter)
     vTaskDelete( NULL );
 }
 
-void set_time(int h,int min){
-    char userTime[8];
-    userTime[0] = h / 10 + '0';
-    userTime[1] = h % 10 + '0';
-    userTime[2] = ':';
-    userTime[3] = min / 10 + '0';
-    userTime[4] = min % 10 + '0';
-    userTime[5] = ':';
-    userTime[6] = '0';
-    userTime[7] = '0';
-    RtcDateTime manual = RtcDateTime(__DATE__, userTime);
-    Rtc.SetDateTime(manual);
-}
-
 void CompCtrlTask( void * parameter)
 {
     Serial.println("CompCtrl");
@@ -167,7 +150,7 @@ void RtcTask( void * parameter)
     Rtc.Enable32kHzPin(false);
     Rtc.SetSquareWavePin(DS3231SquareWavePin_ModeNone);
 
-    RtcDateTime compiled = RtcDateTime(__DATE__, __TIME__);
+    //RtcDateTime compiled = RtcDateTime(__DATE__, __TIME__);
 
     //Rtc.SetDateTime(compiled);
     xSemaphoreGive(i2c_mutex);
@@ -190,11 +173,14 @@ void RtcTask( void * parameter)
     m_rtc = now.Month();
     y_rtc = now.Year();
     temp_rtc = double( temp.AsFloatDegC() );
+    if(y_rtc<1000){mainMenu[0].enabled=disabledStatus; }
+    else{mainMenu[0].enabled=enabledStatus;}
     err_flag = false;
     }
     xSemaphoreGive(i2c_mutex);
+    for(int i=0; i< 30; i++){
     vTaskDelay(1000/portTICK_PERIOD_MS);
-
+    }
     }
 
     Serial.println("Ending RTC");
@@ -242,7 +228,7 @@ void DisplayTask( void * parameter)
     u8g2.enableUTF8Print();	
     u8g2.setFont(fontName);
     // u8g2.setBitmapMode(0);
-    //mainMenu[1].enabled=disabledStatus; //disable second option
+    mainMenu[0].enabled=disabledStatus;
     nav.idleTask=MainScreen;//point a function to be used when menu is suspended
     nav.timeOut=30;
     nav.idleOn(MainScreen);
