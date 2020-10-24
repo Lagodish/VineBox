@@ -2,7 +2,6 @@
 
 //PWM setup
 const int freq = 10000;
-const uint8_t ledChannel = 0;
 const uint8_t resolution = 10; //Resolution 8, 10, 12, 15
 
 //Light
@@ -38,9 +37,6 @@ hw_timer_t *timer = NULL;
 const char* ssid = "Psin(a)";
 const char* password = "Hey!28R0om!";
 
-//eeprom
-#define EEPROM_SIZE 64
-
 // Flags
 bool light_flag = true;
 bool heater_flag = false;
@@ -51,3 +47,25 @@ bool fan2_flag = false;
 bool beeper_flag = true;
 bool err_flag = false;
 bool set_t = false;
+
+bool LightCtrl=HIGH;
+bool FanCtrl=HIGH;
+bool Temp_mode=HIGH;
+bool mainScreenOn = true;
+bool showTemp = false;
+
+bool butt1_l = false;
+bool butt2_l = false;
+bool butt3_l = false;
+bool butt4_l = false;
+
+uint8_t Wireless=0;
+uint8_t PERF=1;
+uint8_t BRT_max = 80;
+uint8_t SPD_max = 80;
+uint8_t BRT_Disp = 20;
+uint8_t timer_1 = 0;
+uint8_t blink=0;
+double setted_temp = 16.0;
+double temp = 9.0;
+double tempPrint =0.0;

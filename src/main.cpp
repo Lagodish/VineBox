@@ -3,30 +3,26 @@
 #include <const.h>
 #include <tasks.h>
 
-#include <Preferences.h> //TODO NVS
-
 void setup() {
 
    Serial.begin(9600); //Uart
    while(!Serial);
    i2c_mutex = xSemaphoreCreateMutex();
-   //xSemaphoreTake(i2c_mutex, portMAX_DELAY);
-   //xSemaphoreGive(i2c_mutex);
-   ledcSetup(1, 10000, 8);
-   ledcSetup(2, 10000, 8);
-   ledcSetup(3, 10000, 8);
-   ledcSetup(4, 10000, 8);
+
+   ledcSetup(1, freq, resolution);
+   ledcSetup(2, freq, resolution);
+   ledcSetup(3, freq, resolution);
+   ledcSetup(4, freq, resolution);
 
    ledcAttachPin(R, 1);
    ledcAttachPin(G, 2);
    ledcAttachPin(B, 3);
    ledcAttachPin(W, 4);
 
-   pinMode(F1 ,OUTPUT);     digitalWrite(F1,LOW);
-   pinMode(F2 ,OUTPUT);     digitalWrite(F2,LOW);
-   pinMode(Comp ,OUTPUT);   digitalWrite(Comp,LOW);
-   pinMode(Beeper ,OUTPUT); digitalWrite(Beeper,LOW);
-
+   pinMode(F1 ,OUTPUT);       digitalWrite(F1,LOW);
+   pinMode(F2 ,OUTPUT);       digitalWrite(F2,LOW);
+   pinMode(Comp ,OUTPUT);     digitalWrite(Comp,LOW);
+ 
    if(ota){
    xTaskCreate(
       ServerOTA,          
@@ -36,6 +32,16 @@ void setup() {
       1,                /* Priority of the task. */           
       NULL);}            /* Task handle. */
    
+   xTaskCreate(
+      DataStorage,
+      "DataStorage",
+      5000,
+      NULL,             /* Parameter passed as input of the task */
+      2,                /* Priority of the task. */
+      NULL);            /* Task handle. */
+
+   delay(100);
+
    xTaskCreate(
       LightCtrlTask,
       "Light",

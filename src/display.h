@@ -50,6 +50,16 @@ bool Hysteresis(double temp_now) {
   return retCode;
 }
 
+void beep(){
+//TODO!
+}
+
+void writeTemp(){
+  preferences.begin("VineBoxData", false);
+  preferences.putDouble("setted_temp",setted_temp);
+  preferences.end();
+}
+
 const colorDef<uint8_t> colors[6] MEMMODE={
   {{0,0},{0,1,1}},//bgColor
   {{1,1},{1,0,0}},//fgColor
@@ -61,37 +71,44 @@ const colorDef<uint8_t> colors[6] MEMMODE={
 
 
 result action4(eventMask e,navNode& nav, prompt &item) {
-  EEPROM.write(3,PERF); 
-  EEPROM.commit();
+  preferences.begin("VineBoxData", false);
+  preferences.putUInt("PERF",PERF);
+  preferences.end();
   return proceed;
 }
 
 result action3(eventMask e,navNode& nav, prompt &item) {
-  EEPROM.write(0, BRT_Disp);
-  EEPROM.commit();
+  preferences.begin("VineBoxData", false);
+  preferences.putUInt("BRT_Disp",BRT_Disp);
+  preferences.end();
   return proceed;
 }
 
 result action2(eventMask e,navNode& nav, prompt &item) {
-  EEPROM.write(5,Temp_mode);
   if(Temp_mode){ // C
     setted_temp = int((setted_temp-32)*5/9);
   }
   else{ //  F
     setted_temp = int((setted_temp*9/5)+32);
   }
-  EEPROM.write(4,setted_temp);
-  EEPROM.commit();
+
+  preferences.begin("VineBoxData", false);
+  preferences.putDouble("setted_temp",setted_temp);
+  preferences.putBool("Temp_mode",Temp_mode);
+  preferences.end();
+
   return proceed;
 }
 
 result action1(eventMask e,navNode& nav, prompt &item) {  
-  EEPROM.write(1,BRT_max);
-  EEPROM.write(2,SPD_max); 
-  EEPROM.write(6,LightCtrl);
-  EEPROM.write(7,FanCtrl);
-  EEPROM.write(9,Wireless);
-  EEPROM.commit();
+  preferences.begin("VineBoxData", false);
+  preferences.putUInt("BRT_max",BRT_max);
+  preferences.putUInt("SPD_max",SPD_max);
+  preferences.putBool("LightCtrl",LightCtrl);
+  preferences.putBool("FanCtrl",FanCtrl);
+  preferences.putUInt("Wireless",Wireless);
+  preferences.end();
+
   return proceed;
 }
 

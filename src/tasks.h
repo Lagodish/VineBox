@@ -7,8 +7,10 @@
 #include <ESPmDNS.h>
 #include <WiFiUdp.h>
 #include <ArduinoOTA.h>
-#include <EEPROM.h>
+#include <Preferences.h> //TODO NVS
+Preferences preferences;
 #include <display.h>
+
 
 RtcDS3231<TwoWire> Rtc(Wire);
 SemaphoreHandle_t i2c_mutex;
@@ -31,7 +33,41 @@ void LightCtrlTask( void * parameter )
     Serial.println("Ending Light");
     vTaskDelete( NULL );
 }
- 
+
+void DataStorage( void * parameter)
+{
+    Serial.println("DataStorage");
+    preferences.begin("VineBoxData", false);
+    //preferences.clear(); // Удаляем все настройки под заданным пространством имён
+    //preferences.remove("counter"); // Удаляем отдельный ключ
+    if(preferences.getBool("StartVB", false)==false){
+        preferences.putBool("StartVB",true);
+        preferences.putUInt("BRT_Disp",50);
+        preferences.putUInt("BRT_max",80);
+        preferences.putUInt("SPD_max",80);
+        preferences.putUInt("PERF",1);
+        preferences.putUInt("Wireless",0);
+        preferences.putDouble("setted_temp",16);
+        preferences.putBool("Temp_mode",HIGH);
+        preferences.putBool("LightCtrl",HIGH);
+        preferences.putBool("FanCtrl",HIGH);
+    }
+    BRT_Disp = preferences.getUInt("BRT_Disp");
+    BRT_max = preferences.getUInt("BRT_max");
+    SPD_max = preferences.getUInt("SPD_max");
+    PERF = preferences.getUInt("PERF");
+    Wireless = preferences.getUInt("Wireless");
+    setted_temp = preferences.getDouble("setted_temp");
+    Temp_mode = preferences.getBool("Temp_mode");
+    LightCtrl = preferences.getBool("LightCtrl");
+    FanCtrl = preferences.getBool("FanCtrl");
+
+    preferences.end();
+    delay(10);
+    Serial.println("Ending DataStorage");
+    vTaskDelete( NULL );
+}
+
 void TempRead( void * parameter)
 {
     Serial.println("TempRead");
@@ -212,50 +248,21 @@ void DisplayTask( void * parameter)
     nav.idleOn(MainScreen);
 
     xSemaphoreGive(i2c_mutex);
-
-    if (EEPROM.begin(EEPROM_SIZE)){
-    delay(10);
-    if(EEPROM.read(10)!=29){
-    EEPROM.write(0,50);     //BRT_Disp
-    EEPROM.write(1,80);     //BRT_max
-    EEPROM.write(2,80);     //SPD_max
-    EEPROM.write(3,1);     //PERF
-    EEPROM.write(4,16);     //setted_temp
-    EEPROM.write(5,HIGH);     //Temp_mode
-    EEPROM.write(6,HIGH);     //LightCtrl
-    EEPROM.write(7,HIGH);     //FanCtrl
-    EEPROM.write(8,HIGH);     //Silence
-    EEPROM.write(9,0);     //Wireless
-
-    EEPROM.write(10,29); //Test flag
-    EEPROM.commit();
-    }
-    delay(10);
-    BRT_Disp = EEPROM.read(0);
-    BRT_max = EEPROM.read(1);
-    SPD_max = EEPROM.read(2);
-    PERF = EEPROM.read(3);
-    setted_temp = EEPROM.read(4);
-    Temp_mode = EEPROM.read(5);
-    LightCtrl = EEPROM.read(6);
-    FanCtrl = EEPROM.read(7);
-    Silence = EEPROM.read(8);
-    Wireless = EEPROM.read(9);
-    }
-    
+   
     while(1){       
     butt1.tick();
     butt2.tick();
     butt3.tick();
     butt4.tick();
-
+    if(tempC[numberOfDevices]<64&&tempC[numberOfDevices]>0){
     temp_cache=tempC[numberOfDevices];
+    }
 
     if (butt1.isClick()){butt1_l = true;nav.doNav(enterCmd);Serial.println("Enter");}else{butt1_l = false;}
     if (butt2.isClick()){butt2_l = true;nav.doNav(upCmd);Serial.println("Up");}else{butt2_l = false;}
     if (butt3.isClick()){butt3_l = true;nav.doNav(downCmd);Serial.println("Down");} else{butt3_l = false;}
     if (butt4.isClick()){butt4_l = true;nav.doNav(escCmd);Serial.println("Esc");} else{butt4_l = false;}
-  
+    //if(butt1_l||butt2_l||butt3_l||butt4_l){beep();}
     if(mainScreenOn&&(butt2_l||butt2.isStep())){
     if(Temp_mode){
     setted_temp+=0.5;
@@ -284,7 +291,7 @@ void DisplayTask( void * parameter)
 
     xSemaphoreGive(i2c_mutex);
 
-    if(showTemp){timer_1++;if(timer_1>101){timer_1=0;showTemp=false; EEPROM.write(4,setted_temp);EEPROM.commit();}}
+    if(showTemp){timer_1++;if(timer_1>101){timer_1=0;showTemp=false; writeTemp();}}
     else{timer_1=0;showTemp=false;}
     vTaskDelay(30/portTICK_PERIOD_MS);
     }
@@ -330,13 +337,7 @@ void ServerOTA( void * parameter)
       // NOTE: if updating SPIFFS this would be the place to unmount SPIFFS using SPIFFS.end()
       Serial.println("Start updating " + type);
     })
-    .onEnd([]() {
-    
-    if (EEPROM.begin(EEPROM_SIZE))
-            {
-            EEPROM.commit();
-            Serial.println("\nOTA off!");
-            }     
+    .onEnd([]() {    
       Serial.println("End");
     })
     .onProgress([](unsigned int progress, unsigned int total) {

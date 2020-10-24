@@ -73,31 +73,3 @@
   bool DualZoneMode = false;
 #endif
 
-uint16_t hrs=12;
-uint16_t mins=0;
-uint16_t year=2020;
-uint16_t month=10;
-uint16_t day=15;
-
-bool LightCtrl=HIGH;
-bool FanCtrl=HIGH;
-bool Temp_mode=HIGH;
-bool Silence=LOW;
-bool mainScreenOn = true;
-bool showTemp = false;
-
-bool butt1_l = false;
-bool butt2_l = false;
-bool butt3_l = false;
-bool butt4_l = false;
-
-uint8_t Wireless=0;
-uint8_t PERF=1;
-uint8_t BRT_max = 80;
-uint8_t SPD_max = 80;
-uint8_t BRT_Disp = 20;
-uint8_t timer_1 = 0;
-uint8_t blink=0;
-double setted_temp = 16.0;
-double temp = 9.0;
-double tempPrint =0.0;
