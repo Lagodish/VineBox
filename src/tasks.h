@@ -2,7 +2,7 @@
 #include <pins.h>
 #include <OneWire.h>
 #include <DallasTemperature.h>
-//#include <RtcDS3231.h>
+#include <RtcDS3231.h>
 #include <WiFi.h>
 #include <ESPmDNS.h>
 #include <WiFiUdp.h>
@@ -10,32 +10,26 @@
 #include <EEPROM.h>
 #include <display.h>
 
+RtcDS3231<TwoWire> Rtc(Wire);
+SemaphoreHandle_t i2c_mutex;
 
-//RtcDS3231<TwoWire> Rtc(Wire);
-
-void IRAM_ATTR resetModule() {
-  esp_restart();
-}
+void IRAM_ATTR resetModule(){esp_restart();}
 
 void LightCtrlTask( void * parameter )
 {
-     Serial.println("Light");
- 
+    Serial.println("Light");
 
     while(1){
+    ledcWrite(3, 0); //briB
+    ledcWrite(1, 0); //briR
+    ledcWrite(2, 0); //briG
+    ledcWrite(4, 0); //brt
 
-        ledcWrite(3, 0); //briB
-        ledcWrite(1, 0); //briR
-        ledcWrite(2, 0); //briG
-        ledcWrite(4, 0); //brt
-
-        vTaskDelay(1000);    
-
+    vTaskDelay(1000/portTICK_PERIOD_MS);
     }
 
     Serial.println("Ending Light");
     vTaskDelete( NULL );
- 
 }
  
 void TempRead( void * parameter)
@@ -49,15 +43,15 @@ void TempRead( void * parameter)
     while(1){
     sensors.requestTemperatures();
     for(int i=0;i<=numberOfDevices; i++){
-    //tempC[i]=0;
+
     if(sensors.getAddress(tempDeviceAddress, i)){// Search the wire for address
       tempC[i] = sensors.getTempC(tempDeviceAddress);// Print the data
-      Serial.print("Temp[");
-      Serial.print(i);
-      Serial.print("]: ");
-      Serial.print(tempC[i]);
-      Serial.print(" C");
-      Serial.println("");
+      //Serial.print("Temp[");
+      //Serial.print(i);
+      //Serial.print("]: ");
+      //Serial.print(tempC[i]);
+      //Serial.print(" C");
+      //Serial.println("");
       //temp_cache=temp_cache+tempC[i];
      // Serial.print(" Temp F: ");
      // Serial.println(DallasTemperature::toFahrenheit(tempC)); // Converts tempC to Fahrenheit
@@ -68,21 +62,312 @@ void TempRead( void * parameter)
     Serial.println("Ending TempRead");
     vTaskDelete( NULL );
 }
-/*
+
 void set_time(int h,int min){
     char userTime[8];
-  userTime[0] = h / 10 + '0';
-  userTime[1] = h % 10 + '0';
-  userTime[2] = ':';
-  userTime[3] = min / 10 + '0';
-  userTime[4] = min % 10 + '0';
-  userTime[5] = ':';
-  userTime[6] = '0';
-  userTime[7] = '0';
-  RtcDateTime manual = RtcDateTime(__DATE__, userTime);
-  Rtc.SetDateTime(manual);
+    userTime[0] = h / 10 + '0';
+    userTime[1] = h % 10 + '0';
+    userTime[2] = ':';
+    userTime[3] = min / 10 + '0';
+    userTime[4] = min % 10 + '0';
+    userTime[5] = ':';
+    userTime[6] = '0';
+    userTime[7] = '0';
+    RtcDateTime manual = RtcDateTime(__DATE__, userTime);
+    Rtc.SetDateTime(manual);
+}
 
-}*/
+void CompCtrlTask( void * parameter)
+{
+    Serial.println("CompCtrl");
+    while(temp_cache<5||temp_cache>64){
+    vTaskDelay(1000/portTICK_PERIOD_MS);
+    }
+
+    while(1){
+    digitalWrite(Comp,Hysteresis(temp_cache));//inveted pin
+    for(int i=0;i<180;i++){
+    vTaskDelay(1000/portTICK_PERIOD_MS);
+    }
+    }
+
+    Serial.println("Ending CompCtrl");
+    vTaskDelete( NULL );
+}
+
+void FanCtrlTask( void * parameter)
+{
+    Serial.println("FanCtrl");
+    while(1){
+    vTaskDelay(1000/portTICK_PERIOD_MS);        
+    }
+
+    Serial.println("Ending FanCtrl");
+    vTaskDelete( NULL );
+}
+
+void HeaterCtrlTask( void * parameter)
+{
+    Serial.println("HeaterCtrl");
+    while(1){
+    vTaskDelay(1000/portTICK_PERIOD_MS);
+    }
+
+    Serial.println("Ending HeaterCtrl");
+    vTaskDelete( NULL );
+}
+
+void RtcTask( void * parameter)
+{
+    Serial.println("RTC");
+    xSemaphoreTake(i2c_mutex, portMAX_DELAY);
+    
+    Rtc.Begin();
+    if (!Rtc.GetIsRunning()){
+        Serial.println("RTC was not actively running, starting now");
+        Rtc.SetIsRunning(true);
+    }
+
+    Rtc.Enable32kHzPin(false);
+    Rtc.SetSquareWavePin(DS3231SquareWavePin_ModeNone);
+
+    RtcDateTime compiled = RtcDateTime(__DATE__, __TIME__);
+
+    //Rtc.SetDateTime(compiled);
+    xSemaphoreGive(i2c_mutex);
+
+    while(1){
+    xSemaphoreTake(i2c_mutex, portMAX_DELAY);
+
+    if(!Rtc.IsDateTimeValid()){
+    Serial.println("RTC ERR, lets set the time!");
+    //Rtc.SetDateTime(compiled);
+    err_flag = true;}
+    else{
+    RtcDateTime now = Rtc.GetDateTime();
+	RtcTemperature temp = Rtc.GetTemperature();
+
+    h_rtc = now.Hour();
+    min_rtc = now.Minute();
+    sec_rtc = now.Second();
+    d_rtc = now.Day();
+    m_rtc = now.Month();
+    y_rtc = now.Year();
+    temp_rtc = double( temp.AsFloatDegC() );
+    err_flag = false;
+    }
+    xSemaphoreGive(i2c_mutex);
+    vTaskDelay(1000/portTICK_PERIOD_MS);
+
+    }
+
+    Serial.println("Ending RTC");
+    vTaskDelete( NULL );
+}
+
+
+void Wdt( void * parameter)
+{
+    Serial.println("Wdt");
+
+    timer = timerBegin(0, 80, true);                  //timer 0, div 80
+    timerAttachInterrupt(timer, &resetModule, true);  //attach callback
+    timerAlarmWrite(timer, wdtTimeout * 1000, false); //set time in us
+    timerAlarmEnable(timer);                          //enable interrupt
+
+    while(1){
+    timerWrite(timer, 0); //reset timer (feed watchdog)
+    vTaskDelay(1000/portTICK_PERIOD_MS);        
+    }
+
+    Serial.println("Ending Wdt");
+    vTaskDelete( NULL );
+}
+
+void StaticTask( void * parameter)
+{
+    Serial.println("Static");
+
+    while(1){
+    vTaskDelay(1000/portTICK_PERIOD_MS);
+    }
+
+    Serial.println("Ending Static");
+    vTaskDelete( NULL );
+}
+
+void DisplayTask( void * parameter)
+{
+    Serial.println("Display");
+    xSemaphoreTake(i2c_mutex, portMAX_DELAY);
+    
+    Wire.begin();
+    u8g2.begin();
+    u8g2.enableUTF8Print();	
+    u8g2.setFont(fontName);
+    // u8g2.setBitmapMode(0);
+    //mainMenu[1].enabled=disabledStatus; //disable second option
+    nav.idleTask=MainScreen;//point a function to be used when menu is suspended
+    nav.timeOut=30;
+    nav.idleOn(MainScreen);
+
+    xSemaphoreGive(i2c_mutex);
+
+    if (EEPROM.begin(EEPROM_SIZE)){
+    delay(10);
+    if(EEPROM.read(10)!=29){
+    EEPROM.write(0,50);     //BRT_Disp
+    EEPROM.write(1,80);     //BRT_max
+    EEPROM.write(2,80);     //SPD_max
+    EEPROM.write(3,1);     //PERF
+    EEPROM.write(4,16);     //setted_temp
+    EEPROM.write(5,HIGH);     //Temp_mode
+    EEPROM.write(6,HIGH);     //LightCtrl
+    EEPROM.write(7,HIGH);     //FanCtrl
+    EEPROM.write(8,HIGH);     //Silence
+    EEPROM.write(9,0);     //Wireless
+
+    EEPROM.write(10,29); //Test flag
+    EEPROM.commit();
+    }
+    delay(10);
+    BRT_Disp = EEPROM.read(0);
+    BRT_max = EEPROM.read(1);
+    SPD_max = EEPROM.read(2);
+    PERF = EEPROM.read(3);
+    setted_temp = EEPROM.read(4);
+    Temp_mode = EEPROM.read(5);
+    LightCtrl = EEPROM.read(6);
+    FanCtrl = EEPROM.read(7);
+    Silence = EEPROM.read(8);
+    Wireless = EEPROM.read(9);
+    }
+    
+    while(1){       
+    butt1.tick();
+    butt2.tick();
+    butt3.tick();
+    butt4.tick();
+
+    temp_cache=tempC[numberOfDevices];
+
+    if (butt1.isClick()){butt1_l = true;nav.doNav(enterCmd);Serial.println("Enter");}else{butt1_l = false;}
+    if (butt2.isClick()){butt2_l = true;nav.doNav(upCmd);Serial.println("Up");}else{butt2_l = false;}
+    if (butt3.isClick()){butt3_l = true;nav.doNav(downCmd);Serial.println("Down");} else{butt3_l = false;}
+    if (butt4.isClick()){butt4_l = true;nav.doNav(escCmd);Serial.println("Esc");} else{butt4_l = false;}
+  
+    if(mainScreenOn&&(butt2_l||butt2.isStep())){
+    if(Temp_mode){
+    setted_temp+=0.5;
+    if(setted_temp>18){setted_temp=18;}}
+    else{
+    setted_temp+=1;
+    if(setted_temp>64){setted_temp=64;}}
+    showTemp=true;timer_1=1;}
+
+    if(mainScreenOn&&(butt3_l||butt3.isStep())){if(Temp_mode){
+    setted_temp-=0.5;
+    if(setted_temp<5){setted_temp=5;}}
+    else{
+    setted_temp-=1;
+    if(setted_temp<41){setted_temp=41;}}
+    showTemp=true;timer_1=1;}
+
+    xSemaphoreTake(i2c_mutex, portMAX_DELAY);
+    nav.doInput();
+    //if (nav.changed(0)) {
+    int contrast = map(BRT_Disp, 0, 100, 0, 190);
+    u8g2.setContrast(contrast);
+    
+    u8g2.firstPage();
+    do nav.doOutput(); while(u8g2.nextPage());
+
+    xSemaphoreGive(i2c_mutex);
+
+    if(showTemp){timer_1++;if(timer_1>101){timer_1=0;showTemp=false; EEPROM.write(4,setted_temp);EEPROM.commit();}}
+    else{timer_1=0;showTemp=false;}
+    vTaskDelay(30/portTICK_PERIOD_MS);
+    }
+
+    Serial.println("Ending Display");
+    vTaskDelete( NULL );
+}
+
+
+void ServerOTA( void * parameter)
+{
+  Serial.println("ServerOTA");
+
+  WiFi.mode(WIFI_STA);
+  WiFi.begin(ssid, password);
+    //WiFi.setHostname("VineBox");
+  //  tcpip_adapter_set_hostname
+    
+    while (WiFi.status() != WL_CONNECTED) {
+        vTaskDelay(1000);
+        Serial.print(".");
+    }
+
+  // Port defaults to 3232
+   ArduinoOTA.setPort(3232);
+
+   // char* name = "VineBox_" + String((uint16_t)(chipid>>32));
+  // Hostname defaults to esp3232-[MAC]
+   ArduinoOTA.setHostname("VineBoxOTA");
+   ArduinoOTA.setPassword("quZJU4KNywpHm9pS");
+
+    //Sets the password as above but in the form MD5(password). Default NULL
+    //ArduinoOTA.setPasswordHash(md5_);
+
+  ArduinoOTA
+    .onStart([]() {
+      String type;
+      if (ArduinoOTA.getCommand() == U_FLASH)
+        type = "sketch";
+      else // U_SPIFFS
+        type = "filesystem";
+
+      // NOTE: if updating SPIFFS this would be the place to unmount SPIFFS using SPIFFS.end()
+      Serial.println("Start updating " + type);
+    })
+    .onEnd([]() {
+    
+    if (EEPROM.begin(EEPROM_SIZE))
+            {
+            EEPROM.write(ota_e,false);
+            EEPROM.write(ts_e,true);
+            EEPROM.commit();
+            Serial.println("\nOTA off!");
+            }     
+      Serial.println("End");
+    })
+    .onProgress([](unsigned int progress, unsigned int total) {
+      Serial.printf("Progress: %u%%\r\n", (progress / (total / 100)));
+    })
+    .onError([](ota_error_t error) {
+      Serial.printf("Error[%u]: ", error);
+      if (error == OTA_AUTH_ERROR) Serial.println("Auth Failed");
+      else if (error == OTA_BEGIN_ERROR) Serial.println("Begin Failed");
+      else if (error == OTA_CONNECT_ERROR) Serial.println("Connect Failed");
+      else if (error == OTA_RECEIVE_ERROR) Serial.println("Receive Failed");
+      else if (error == OTA_END_ERROR) Serial.println("End Failed");
+    });
+
+  ArduinoOTA.begin();
+
+  Serial.println("Ready");
+  Serial.print("IP address: ");
+  Serial.println(WiFi.localIP());
+
+    while(1){
+    ArduinoOTA.handle();
+    vTaskDelay(5000/portTICK_PERIOD_MS);
+    }
+
+    Serial.println("Ending ServerOTA");
+    vTaskDelete( NULL );
+}
+
 /*
 void BLE( void * parameter)
 {
@@ -420,319 +705,3 @@ void BLE( void * parameter)
     vTaskDelete( NULL );
 }
 */
-void CompCtrlTask( void * parameter)
-{
-    Serial.println("CompCtrl");
-    while(temp_cache<5||temp_cache>64){
-    vTaskDelay(1000/portTICK_PERIOD_MS);
-    }
-
-    while(1){
-    digitalWrite(Comp,Hysteresis(temp_cache));//inveted pin
-    for(int i=0;i<180;i++){
-    vTaskDelay(1000/portTICK_PERIOD_MS);
-    }
-    }
-
-    Serial.println("Ending CompCtrl");
-    vTaskDelete( NULL );
-}
-
-void FanCtrlTask( void * parameter)
-{
-    Serial.println("FanCtrl");
-    while(1){
-    vTaskDelay(1000);
-        
-    }
-
-    Serial.println("Ending FanCtrl");
-    vTaskDelete( NULL );
-}
-
-void HeaterCtrlTask( void * parameter)
-{
-    Serial.println("HeaterCtrl");
-    while(1){
-    vTaskDelay(1000);
-
-    //Temp PI regulator 
-        
-    }
-
-    Serial.println("Ending HeaterCtrl");
-    vTaskDelete( NULL );
-}
-
-void RtcTask( void * parameter)
-{
-    Serial.println("RTC");
-/*
-    int counter = 0;
-    
-    Rtc.Begin();
-    Serial.println();
-        if (!Rtc.GetIsRunning())
-    {
-        Serial.println("RTC was not actively running, starting now");
-        Rtc.SetIsRunning(true);
-    }
-
-    Rtc.Enable32kHzPin(false);
-    Rtc.SetSquareWavePin(DS3231SquareWavePin_ModeNone);
-
-    RtcDateTime compiled = RtcDateTime(__DATE__, __TIME__);
-    if(ts){
-        set_t = true;
-        EEPROM.write(ts_e,false);
-        EEPROM.commit();
-    }
-    i2c = false;
-  //  Rtc.SetDateTime(compiled);
-    while(1){
-
-    if(set_t){
-            Rtc.SetDateTime(compiled);
-            set_t = false;
-        }
-
-
-    if(!Rtc.IsDateTimeValid()){
-            if(counter==0)
-                Serial.println("RTC ERR, lets set the time!");
-            if(counter>20)
-                counter = 0;
-            counter++;
-         err_flag = true;
-
-    }
-    else{
-
-    RtcDateTime now = Rtc.GetDateTime();
-	RtcTemperature temp = Rtc.GetTemperature();
-
-
-    h_rtc = now.Hour();
-    min_rtc = now.Minute();
-    sec_rtc = now.Second();
-    d_rtc = now.Day();
-    m_rtc = now.Month();
-    y_rtc = now.Year();
-    temp_rtc = double( temp.AsFloatDegC() );
-
-    err_flag = false;
-    }
-
-*/  while(1){  
-
-    vTaskDelay(900);
-        
-    }
-
-    Serial.println("Ending RTC");
-    vTaskDelete( NULL );
-}
-
-
-void Wdt( void * parameter)
-{
-    Serial.println("Wdt");
-
-    timer = timerBegin(0, 80, true);                  //timer 0, div 80
-    timerAttachInterrupt(timer, &resetModule, true);  //attach callback
-    timerAlarmWrite(timer, wdtTimeout * 1000, false); //set time in us
-    timerAlarmEnable(timer);                          //enable interrupt
-
-    while(1){
-
-    timerWrite(timer, 0); //reset timer (feed watchdog)
-    vTaskDelay(100);
-        
-    }
-
-    Serial.println("Ending Wdt");
-    vTaskDelete( NULL );
-}
-
-void StaticTask( void * parameter)
-{
-    Serial.println("Static");
-
-    while(1){
-
-    vTaskDelay(1000);
-    }
-
-    Serial.println("Ending Static");
-    vTaskDelete( NULL );
-}
-
-void DisplayTask( void * parameter)
-{
-    Serial.println("Display");
-
-    Wire.begin();
-    u8g2.begin();
-    u8g2.enableUTF8Print();	
-
-    if (EEPROM.begin(EEPROM_SIZE)){
-    delay(10);
-    if(EEPROM.read(10)!=29){
-    EEPROM.write(0,50);     //BRT_Disp
-    EEPROM.write(1,80);     //BRT_max
-    EEPROM.write(2,80);     //SPD_max
-    EEPROM.write(3,1);     //PERF
-    EEPROM.write(4,16);     //setted_temp
-    EEPROM.write(5,HIGH);     //Temp_mode
-    EEPROM.write(6,HIGH);     //LightCtrl
-    EEPROM.write(7,HIGH);     //FanCtrl
-    EEPROM.write(8,HIGH);     //Silence
-    EEPROM.write(9,0);     //Wireless
-
-    EEPROM.write(10,29); //Test flag
-    EEPROM.commit();
-    }
-    delay(10);
-    BRT_Disp = EEPROM.read(0);
-    BRT_max = EEPROM.read(1);
-    SPD_max = EEPROM.read(2);
-    PERF = EEPROM.read(3);
-    setted_temp = EEPROM.read(4);
-    Temp_mode = EEPROM.read(5);
-    LightCtrl = EEPROM.read(6);
-    FanCtrl = EEPROM.read(7);
-    Silence = EEPROM.read(8);
-    Wireless = EEPROM.read(9);
-    }
-    
-
-    u8g2.setFont(fontName);
-    // u8g2.setBitmapMode(0);
-    //mainMenu[1].enabled=disabledStatus; //disable second option
-    nav.idleTask=MainScreen;//point a function to be used when menu is suspended
-    nav.timeOut=30;
-    nav.idleOn(MainScreen);
-
-    while(1){       
-    butt1.tick();
-    butt2.tick();
-    butt3.tick();
-    butt4.tick();
-
-    temp_cache=tempC[numberOfDevices];
-
-    if (butt1.isClick()){butt1_l = true;nav.doNav(enterCmd);Serial.println("enterCmd");}else{butt1_l = false;}
-    if (butt2.isClick()){butt2_l = true;nav.doNav(upCmd);Serial.println("upCmd");}else{butt2_l = false;}
-    if (butt3.isClick()){butt3_l = true;nav.doNav(downCmd);Serial.println("downCmd");} else{butt3_l = false;}
-    if (butt4.isClick()){butt4_l = true;nav.doNav(escCmd);Serial.println("escCmd");} else{butt4_l = false;}
-  
-    if(mainScreenOn&&(butt2_l||butt2.isStep())){
-    if(Temp_mode){
-    setted_temp+=0.5;
-    if(setted_temp>18){setted_temp=18;}}
-    else{
-    setted_temp+=1;
-    if(setted_temp>64){setted_temp=64;}}
-    showTemp=true;timer_1=1;}
-
-    if(mainScreenOn&&(butt3_l||butt3.isStep())){if(Temp_mode){
-    setted_temp-=0.5;
-    if(setted_temp<5){setted_temp=5;}}
-    else{
-    setted_temp-=1;
-    if(setted_temp<41){setted_temp=41;}}
-    showTemp=true;timer_1=1;}
-
-    nav.doInput();
-    //if (nav.changed(0)) {
-    int contrast = map(BRT_Disp, 0, 100, 0, 190);
-    u8g2.setContrast(contrast);
-    u8g2.firstPage();
-    do nav.doOutput(); while(u8g2.nextPage());
-
-    blink++;
-    if(blink>=100){blink=0;}
-    //}
-    if(showTemp){timer_1++;if(timer_1>101){timer_1=0;showTemp=false; EEPROM.write(4,setted_temp);EEPROM.commit();}}
-    else{timer_1=0;showTemp=false;}
-    vTaskDelay(30/portTICK_PERIOD_MS);
-    }
-
-    Serial.println("Ending Display");
-    vTaskDelete( NULL );
-}
-
-
-void ServerOTA( void * parameter)
-{
-  Serial.println("ServerOTA");
-
-  WiFi.mode(WIFI_STA);
-  WiFi.begin(ssid, password);
-    //WiFi.setHostname("VineBox");
-  //  tcpip_adapter_set_hostname
-    
-    while (WiFi.status() != WL_CONNECTED) {
-        vTaskDelay(1000);
-        Serial.print(".");
-    }
-
-  // Port defaults to 3232
-   ArduinoOTA.setPort(3232);
-
-   // char* name = "VineBox_" + String((uint16_t)(chipid>>32));
-  // Hostname defaults to esp3232-[MAC]
-   ArduinoOTA.setHostname("VineBoxOTA");
-   ArduinoOTA.setPassword("quZJU4KNywpHm9pS");
-
-    //Sets the password as above but in the form MD5(password). Default NULL
-    //ArduinoOTA.setPasswordHash(md5_);
-
-  ArduinoOTA
-    .onStart([]() {
-      String type;
-      if (ArduinoOTA.getCommand() == U_FLASH)
-        type = "sketch";
-      else // U_SPIFFS
-        type = "filesystem";
-
-      // NOTE: if updating SPIFFS this would be the place to unmount SPIFFS using SPIFFS.end()
-      Serial.println("Start updating " + type);
-    })
-    .onEnd([]() {
-    
-    if (EEPROM.begin(EEPROM_SIZE))
-            {
-            EEPROM.write(ota_e,false);
-            EEPROM.write(ts_e,true);
-            EEPROM.commit();
-            Serial.println("\nOTA off!");
-            }     
-      Serial.println("End");
-    })
-    .onProgress([](unsigned int progress, unsigned int total) {
-      Serial.printf("Progress: %u%%\r\n", (progress / (total / 100)));
-    })
-    .onError([](ota_error_t error) {
-      Serial.printf("Error[%u]: ", error);
-      if (error == OTA_AUTH_ERROR) Serial.println("Auth Failed");
-      else if (error == OTA_BEGIN_ERROR) Serial.println("Begin Failed");
-      else if (error == OTA_CONNECT_ERROR) Serial.println("Connect Failed");
-      else if (error == OTA_RECEIVE_ERROR) Serial.println("Receive Failed");
-      else if (error == OTA_END_ERROR) Serial.println("End Failed");
-    });
-
-  ArduinoOTA.begin();
-
-  Serial.println("Ready");
-  Serial.print("IP address: ");
-  Serial.println(WiFi.localIP());
-
-    while(1){
-    ArduinoOTA.handle();
-    vTaskDelay(3000);
-    }
-
-    Serial.println("Ending ServerOTA");
-    vTaskDelete( NULL );
-}

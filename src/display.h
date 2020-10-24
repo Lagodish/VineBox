@@ -139,14 +139,14 @@ MENU(FanMenu,text_15,doNothing,noEvent,noStyle
 );
  
 PADMENU(YMD_Menu,text_14,doNothing,noEvent,noStyle
-  ,FIELD(year,"","/",1900,3000,20,1,doNothing,noEvent,noStyle)
-  ,FIELD(month,"","/",1,12,1,0,doNothing,noEvent,wrapStyle)
-  ,FIELD(day,"","",1,31,1,0,doNothing,noEvent,wrapStyle)
+  ,FIELD(y_rtc,"","/",1900,3000,20,1,doNothing,noEvent,noStyle)
+  ,FIELD(m_rtc,"","/",1,12,1,0,doNothing,noEvent,wrapStyle)
+  ,FIELD(d_rtc,"","",1,31,1,0,doNothing,noEvent,wrapStyle)
 );
 
 PADMENU(HM_Menu,text_13,doNothing,noEvent,noStyle
-  ,FIELD(hrs,"",":",0,23,1,0,doNothing,noEvent,wrapStyle)
-  ,FIELD(mins,"","",0,59,1,0,doNothing,noEvent,wrapStyle)
+  ,FIELD(h_rtc,"",":",0,23,1,0,doNothing,noEvent,wrapStyle)
+  ,FIELD(min_rtc,"","",0,59,1,0,doNothing,noEvent,wrapStyle)
 );
 
 MENU(timeMenu,text_12,doNothing,noEvent,noStyle

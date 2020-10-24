@@ -3,30 +3,29 @@
 #include <const.h>
 #include <tasks.h>
 
-
+#include <Preferences.h> //TODO NVS
 
 void setup() {
 
-  Serial.begin(9600); //Uart
-  Serial1.begin(9600); //Uart
-  while(!Serial);
-  
-  ledcSetup(1, 10000, 8);
-  ledcSetup(2, 10000, 8);
-  ledcSetup(3, 10000, 8);
-  ledcSetup(4, 10000, 8);
+   Serial.begin(9600); //Uart
+   while(!Serial);
+   i2c_mutex = xSemaphoreCreateMutex();
+   //xSemaphoreTake(i2c_mutex, portMAX_DELAY);
+   //xSemaphoreGive(i2c_mutex);
+   ledcSetup(1, 10000, 8);
+   ledcSetup(2, 10000, 8);
+   ledcSetup(3, 10000, 8);
+   ledcSetup(4, 10000, 8);
 
-  ledcAttachPin(R, 1);
-  ledcAttachPin(G, 2);
-  ledcAttachPin(B, 3);
-  ledcAttachPin(W, 4);
+   ledcAttachPin(R, 1);
+   ledcAttachPin(G, 2);
+   ledcAttachPin(B, 3);
+   ledcAttachPin(W, 4);
 
-  pinMode(F1 ,OUTPUT);
-  pinMode(F2 ,OUTPUT);
-  pinMode(Comp ,OUTPUT);
-  pinMode(Beeper ,OUTPUT);
-
-  //disableCore0WDT();
+   pinMode(F1 ,OUTPUT);     digitalWrite(F1,LOW);
+   pinMode(F2 ,OUTPUT);     digitalWrite(F2,LOW);
+   pinMode(Comp ,OUTPUT);   digitalWrite(Comp,LOW);
+   pinMode(Beeper ,OUTPUT); digitalWrite(Beeper,LOW);
 
    if(ota){
    xTaskCreate(
