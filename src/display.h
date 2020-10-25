@@ -8,9 +8,10 @@
 #include <EEPROM.h>
 #include <GyverButton.h>
 #include <config.h>
-
 #include <RtcDS3231.h>
+
 RtcDS3231<TwoWire> Rtc(Wire);
+Preferences preferences;
 
 GButton butt1(GP1); //GButton touch(BTN_PIN, LOW_PULL, NORM_OPEN);
 GButton butt2(GP2);

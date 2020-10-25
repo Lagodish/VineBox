@@ -2,7 +2,7 @@
 
 //PWM setup
 const int freq = 10000;
-const uint8_t resolution = 10; //Resolution 8, 10, 12, 15
+const uint8_t resolution = 10;
 
 //Light
 uint8_t briR = 0;
@@ -11,7 +11,6 @@ uint8_t briB = 0;
 uint8_t briW = 0;
 
 //boot
-bool ota = false;
 bool ts = false;
 
 //DS18B20 setup
@@ -34,8 +33,8 @@ const uint16_t wdtTimeout = 3000;  //time in ms to trigger the watchdog
 hw_timer_t *timer = NULL;
 
 //WIFI
-const char* ssid = "Psin(a)";
-const char* password = "Hey!28R0om!";
+const char* ssid = "";
+const char* password = "";
 
 // Flags
 bool light_flag = true;
@@ -60,14 +59,14 @@ bool butt3_l = false;
 bool butt4_l = false;
 
 uint8_t Wireless=0;
-uint8_t PERF=1;
-uint8_t BRT_max = 80;
-uint8_t SPD_max = 80;
-uint8_t BRT_Disp = 20;
+uint8_t PERF=0;
+uint8_t BRT_max = 0;
+uint8_t SPD_max = 0;
+uint8_t BRT_Disp = 0;
 uint8_t timer_1 = 0;
 uint8_t blink=0;
-double setted_temp = 16.0;
-double temp = 9.0;
+double setted_temp = 0.0;
+double temp = 0.0;
 double tempPrint =0.0;
 
 #define SERVICE_UUID        "95e95e3e-6cd6-4bf1-8e65-8faca66d90b0"

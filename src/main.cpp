@@ -10,16 +10,7 @@ void setup() {
 
    i2c_mutex = xSemaphoreCreateMutex();
    antenna_mutex = xSemaphoreCreateMutex();
-    
-   if(ota){
-   xTaskCreate(
-      ServerOTA,          
-      "ServerOTA",        
-      8000,            
-      NULL,             /* Parameter passed as input of the task */          
-      1,                /* Priority of the task. */           
-      NULL);}            /* Task handle. */
-   
+      
    xTaskCreate(
       DataStorage,
       "DataStorage",
@@ -94,7 +85,7 @@ void setup() {
       "DisplayTask",
       10000,
       NULL,
-      1,              /* Priority of the task. */
+      2,              /* Priority of the task. */
       NULL,           /* Task handle. */
       0);             /* Core 0 */ 
 

@@ -3,16 +3,12 @@
 #include <OneWire.h>
 #include <DallasTemperature.h>
 #include <WiFi.h>
-#include <ESPmDNS.h>
-#include <WiFiUdp.h>
-#include <ArduinoOTA.h>
 //BLE
 #include <BLEDevice.h>
 #include <BLEUtils.h>
 #include <BLEServer.h>
 //
 #include <Preferences.h> //TODO NVS
-Preferences preferences;
 #include <display.h>
 
 SemaphoreHandle_t i2c_mutex;
@@ -102,8 +98,6 @@ void TempRead( void * parameter)
       //Serial.print(" C");
       //Serial.println("");
       //temp_cache=temp_cache+tempC[i];
-     // Serial.print(" Temp F: ");
-     // Serial.println(DallasTemperature::toFahrenheit(tempC)); // Converts tempC to Fahrenheit
     }}
     vTaskDelay(1000/portTICK_PERIOD_MS);
     }
@@ -122,7 +116,7 @@ void CompCtrlTask( void * parameter)
     }
 
     while(1){
-    digitalWrite(Comp,Hysteresis(temp_cache));//inveted pin
+    digitalWrite(Comp,Hysteresis(temp_cache));
     for(int i=0;i<180;i++){
     vTaskDelay(1000/portTICK_PERIOD_MS);
     }
@@ -147,31 +141,16 @@ void FanCtrlTask( void * parameter)
     vTaskDelete( NULL );
 }
 
-void HeaterCtrlTask( void * parameter)
-{
-    Serial.println("HeaterCtrl");
-    while(1){
-    vTaskDelay(1000/portTICK_PERIOD_MS);
-    }
-
-    Serial.println("Ending HeaterCtrl");
-    vTaskDelete( NULL );
-}
-
 void RtcTask( void * parameter)
 {
     Serial.println("RTC");
     xSemaphoreTake(i2c_mutex, portMAX_DELAY);
-    
     Rtc.Begin();
     if (!Rtc.GetIsRunning()){
         Serial.println("RTC was not actively running, starting now");
-        Rtc.SetIsRunning(true);
-    }
-
+        Rtc.SetIsRunning(true);}
     Rtc.Enable32kHzPin(false);
     Rtc.SetSquareWavePin(DS3231SquareWavePin_ModeNone);
-
     xSemaphoreGive(i2c_mutex);
 
     while(1){
@@ -213,7 +192,6 @@ void RtcTask( void * parameter)
 void Wdt( void * parameter)
 {
     Serial.println("Wdt");
-
     timer = timerBegin(0, 80, true);                  //timer 0, div 80
     timerAttachInterrupt(timer, &resetModule, true);  //attach callback
     timerAlarmWrite(timer, wdtTimeout * 1000, false); //set time in us
@@ -305,61 +283,5 @@ void DisplayTask( void * parameter)
     }
 
     Serial.println("Ending Display");
-    vTaskDelete( NULL );
-}
-
-
-void ServerOTA( void * parameter)
-{
-    Serial.println("ServerOTA");
-    xSemaphoreTake(antenna_mutex, portMAX_DELAY);
-    WiFi.mode(WIFI_STA);
-    WiFi.begin(ssid, password);
-
-    while (WiFi.status() != WL_CONNECTED) {
-        vTaskDelay(5000/portTICK_PERIOD_MS);
-    }
-    ArduinoOTA.setPort(3232);
-    ArduinoOTA.setHostname("VineBoxOTA");
-    ArduinoOTA.setPassword("quZJU4KNywpHm9pS");
-
-    ArduinoOTA
-    .onStart([]() {
-      String type;
-      if (ArduinoOTA.getCommand() == U_FLASH)
-        type = "sketch";
-      else // U_SPIFFS
-        type = "filesystem";
-      // NOTE: if updating SPIFFS this would be the place to unmount SPIFFS using SPIFFS.end()
-      Serial.println("Start updating " + type);
-    })
-    .onEnd([]() {    
-      Serial.println("End");
-    })
-    .onProgress([](unsigned int progress, unsigned int total) {
-      Serial.printf("Progress: %u%%\r\n", (progress / (total / 100)));
-    })
-    .onError([](ota_error_t error) {
-      Serial.printf("Error[%u]: ", error);
-      if (error == OTA_AUTH_ERROR) Serial.println("Auth Failed");
-      else if (error == OTA_BEGIN_ERROR) Serial.println("Begin Failed");
-      else if (error == OTA_CONNECT_ERROR) Serial.println("Connect Failed");
-      else if (error == OTA_RECEIVE_ERROR) Serial.println("Receive Failed");
-      else if (error == OTA_END_ERROR) Serial.println("End Failed");
-    });
-
-    ArduinoOTA.begin();
-    Serial.println("");
-    Serial.print("IP address: ");
-    Serial.println(WiFi.localIP());
-    xSemaphoreGive(antenna_mutex);
-    while(1){
-    xSemaphoreTake(antenna_mutex, portMAX_DELAY);
-    ArduinoOTA.handle();
-    xSemaphoreGive(antenna_mutex);
-    vTaskDelay(1000/portTICK_PERIOD_MS);
-    }
-
-    Serial.println("Ending ServerOTA");
     vTaskDelete( NULL );
 }
