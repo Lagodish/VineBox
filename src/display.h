@@ -180,7 +180,7 @@ MENU(LightMenu,text_16,doNothing,noEvent,noStyle
   ,SUBMENU(setLight)
   ,FIELD(BRT_max,text_18,"%",0,100,10,1,action1,enterEvent,wrapStyle)
   ,SUBMENU(setRGBLight)
-  ,FIELD(RGB_set,text_5,"",0,100,10,1,action1,enterEvent,wrapStyle)
+  ,FIELD(RGB_set,text_5,"",0,100,1,0,action1,enterEvent,wrapStyle)
   ,EXIT(text_11)
 );
 

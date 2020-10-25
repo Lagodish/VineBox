@@ -14,7 +14,7 @@
   #define text_2    "White Light: "
   #define text_3    "Auto Fan: "
   #define text_4    "Temp: "
-  #define text_5    "RGB set"
+  #define text_5    "RGB Color"
   #define text_6    "Wireless: "
   #define text_7    "Perf: "
   #define text_8    "On"
@@ -38,10 +38,10 @@
 
 #ifdef language_RU
   #define text_1    "Настройки"
-  #define text_2    "Основная: "
+  #define text_2    "Главная: "
   #define text_3    "Авто: "
   #define text_4    "Шкала: "
-  #define text_5    "RGB цвет"
+  #define text_5    "Цвет"
   #define text_6    "Сеть: "
   #define text_7    "Режим: "
   #define text_8    "Вкл"
