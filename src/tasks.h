@@ -11,6 +11,47 @@ SemaphoreHandle_t antenna_mutex;
 
 void IRAM_ATTR resetModule(){esp_restart();}
 
+void setRGB(int color){
+    uint8_t _r =0;
+    uint8_t _g =0;
+    uint8_t _b =0;
+
+    if (color <= 255) {						// красный макс, зелёный растёт
+		_r = 255;
+		_g = color;
+		_b = 0;
+	}
+	else if (color > 255 && color <= 510) {		// зелёный макс, падает красный 
+		_r = 510 - color;
+		_g = 255;
+		_b = 0;
+	}
+	else if (color > 510 && color <= 765) {		// зелёный макс, растёт синий
+		_r = 0;
+		_g = 255;
+		_b = color - 510;
+	}
+	else if (color > 765 && color <= 1020) {	// синий макс, падает зелёный
+		_r = 0;
+		_g = 1020 - color;
+		_b = 255;
+	}
+	else if (color > 1020 && color <= 1275) { 	// синий макс, растёт красный
+		_r = color - 1020;
+		_g = 0;
+		_b = 255;
+	}
+	else if (color > 1275 && color <= 1530) {	// красный макс, падает синий
+		_r = 255;
+		_g = 0;
+		_b = 1530 - color;
+	}
+
+    ledcWrite(3, _b); //briB
+    ledcWrite(1, _r); //briR
+    ledcWrite(2, _g); //briG
+}
+
 void LightCtrlTask( void * parameter )
 {
     Serial.println("Light");
@@ -24,11 +65,24 @@ void LightCtrlTask( void * parameter )
     ledcAttachPin(B, 3);
     ledcAttachPin(W, 4);
 
+    int BRT_now = 0;
+    int RGB_now = 0;
     while(1){
-    ledcWrite(3, 0); //briB
-    ledcWrite(1, 0); //briR
-    ledcWrite(2, 0); //briG
-    ledcWrite(4, 0); //brt
+        if(LightCtrl){
+            BRT_now = map(BRT_max,0,100,0,255);
+            ledcWrite(4, BRT_now);}
+        else{
+            ledcWrite(4, 0);}
+
+        if(RGBCtrl){
+            RGB_now = map(RGB_set,0,100,0,1530);
+            setRGB(RGB_now);
+        }
+        else{
+            ledcWrite(3, 0); //briB
+            ledcWrite(1, 0); //briR
+            ledcWrite(2, 0); //briG
+        }
 
     vTaskDelay(1000/portTICK_PERIOD_MS);
     }
@@ -52,8 +106,10 @@ void DataStorage( void * parameter)
         preferences.putUInt("Wireless",0);
         preferences.putDouble("setted_temp",16);
         preferences.putBool("Temp_mode",HIGH);
-        preferences.putBool("LightCtrl",HIGH);
+        preferences.putBool("LightCtrl",LOW);
         preferences.putBool("FanCtrl",HIGH);
+        preferences.putUInt("RGB_set",0);
+        preferences.putBool("RGBCtrl",LOW);
         ts = true;
     }
     BRT_Disp = preferences.getUInt("BRT_Disp");
@@ -65,6 +121,8 @@ void DataStorage( void * parameter)
     Temp_mode = preferences.getBool("Temp_mode");
     LightCtrl = preferences.getBool("LightCtrl");
     FanCtrl = preferences.getBool("FanCtrl");
+    RGB_set = preferences.getUInt("RGB_set");
+    RGBCtrl = preferences.getBool("RGBCtrl");
 
     preferences.end();
     delay(10);

@@ -9,16 +9,12 @@
 
 //////////////////////  Config End    //////////////////////
 
-
-//#define  language_RU 
-#define language_EU
-
 #ifdef language_EU
   #define text_1    "Settings"
-  #define text_2    "Auto Light: "
+  #define text_2    "White Light: "
   #define text_3    "Auto Fan: "
   #define text_4    "Temp: "
-  #define text_5    "???"
+  #define text_5    "RGB set"
   #define text_6    "Wireless: "
   #define text_7    "Perf: "
   #define text_8    "On"
@@ -37,14 +33,15 @@
   #define text_21   "High"
   #define text_22   "Celsius"
   #define text_23   "Fahrenheit"
+  #define text_24    "RGB: "
 #endif
 
 #ifdef language_RU
   #define text_1    "Настройки"
-  #define text_2    "Авто: "
+  #define text_2    "Основная: "
   #define text_3    "Авто: "
   #define text_4    "Шкала: "
-  #define text_5    "???"
+  #define text_5    "RGB цвет"
   #define text_6    "Сеть: "
   #define text_7    "Режим: "
   #define text_8    "Вкл"
@@ -63,6 +60,7 @@
   #define text_21   "Высокий"
   #define text_22   "Цельсия"
   #define text_23   "Фаренгейта"
+  #define text_24    "RGB: "
 #endif
 
 #ifdef DualZone

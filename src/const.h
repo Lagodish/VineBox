@@ -2,7 +2,7 @@
 
 //PWM setup
 const int freq = 10000;
-const uint8_t resolution = 10;
+const uint8_t resolution = 8;
 
 //Light
 uint8_t briR = 0;
@@ -53,8 +53,9 @@ bool beeper_flag = true;
 bool err_flag = false;
 bool set_t = false;
 
-bool LightCtrl=HIGH;
-bool FanCtrl=HIGH;
+bool LightCtrl=LOW;
+bool RGBCtrl=LOW;
+bool FanCtrl=LOW;
 bool Temp_mode=HIGH;
 bool mainScreenOn = true;
 bool showTemp = false;
@@ -67,6 +68,7 @@ bool butt4_l = false;
 uint8_t Wireless=0;
 uint8_t PERF=0;
 uint8_t BRT_max = 0;
+uint8_t RGB_set = 0;
 uint8_t SPD_max = 0;
 uint8_t BRT_Disp = 0;
 uint8_t timer_1 = 0;

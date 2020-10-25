@@ -132,6 +132,8 @@ result action1(eventMask e,navNode& nav, prompt &item) {
   preferences.begin("VineBoxData", false);
   preferences.putUInt("BRT_max",BRT_max);
   preferences.putUInt("SPD_max",SPD_max);
+  preferences.putUInt("RGB_set",RGB_set);
+  preferences.putBool("RGBCtrl",RGBCtrl);
   preferences.putBool("LightCtrl",LightCtrl);
   preferences.putBool("FanCtrl",FanCtrl);
   preferences.putUInt("Wireless",Wireless);
@@ -140,6 +142,10 @@ result action1(eventMask e,navNode& nav, prompt &item) {
   return proceed;
 }
 
+TOGGLE(RGBCtrl,setRGBLight,text_24,action1,enterEvent,noStyle
+  ,VALUE(text_8,HIGH,doNothing,noEvent)
+  ,VALUE(text_9,LOW,doNothing,noEvent)
+);
 
 TOGGLE(LightCtrl,setLight,text_2,action1,enterEvent,noStyle
   ,VALUE(text_8,HIGH,doNothing,noEvent)
@@ -172,13 +178,15 @@ TOGGLE(PERF,PerformanceMenu,text_7,action4,enterEvent,noStyle
 
 MENU(LightMenu,text_16,doNothing,noEvent,noStyle
   ,SUBMENU(setLight)
-  ,FIELD(BRT_max,text_18,"%",0,100,10,0,action1,enterEvent,wrapStyle)
+  ,FIELD(BRT_max,text_18,"%",0,100,10,1,action1,enterEvent,wrapStyle)
+  ,SUBMENU(setRGBLight)
+  ,FIELD(RGB_set,text_5,"",0,100,10,1,action1,enterEvent,wrapStyle)
   ,EXIT(text_11)
 );
 
 MENU(FanMenu,text_15,doNothing,noEvent,noStyle
   ,SUBMENU(setFan)
-  ,FIELD(SPD_max,text_17,"%",0,100,10,0,action1,enterEvent,wrapStyle)
+  ,FIELD(SPD_max,text_17,"%",0,100,10,1,action1,enterEvent,wrapStyle)
   ,EXIT(text_11)
 );
 
