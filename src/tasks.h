@@ -3,11 +3,6 @@
 #include <OneWire.h>
 #include <DallasTemperature.h>
 #include <WiFi.h>
-//BLE
-#include <BLEDevice.h>
-#include <BLEUtils.h>
-#include <BLEServer.h>
-//
 #include <Preferences.h> //TODO NVS
 #include <display.h>
 

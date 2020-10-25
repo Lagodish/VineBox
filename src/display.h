@@ -5,7 +5,6 @@
 #include <menuIO/chainStream.h>
 #include <menuIO/serialOut.h>
 #include <menuIO/serialIn.h>
-#include <EEPROM.h>
 #include <GyverButton.h>
 #include <config.h>
 #include <RtcDS3231.h>
@@ -17,8 +16,6 @@ GButton butt1(GP1); //GButton touch(BTN_PIN, LOW_PULL, NORM_OPEN);
 GButton butt2(GP2);
 GButton butt3(GP3);
 GButton butt4(GP4);
-
-//xSemaphoreCreateMutex
 
 using namespace Menu;
 
@@ -74,33 +71,14 @@ const colorDef<uint8_t> colors[6] MEMMODE={
 };
 
 result action6(eventMask e,navNode& nav, prompt &item) {
+
   if(Wireless==0){    //No
 
   }
   if(Wireless==1){    //WiFi
 
   }
-  if(Wireless==2){    //BLE
-    BLEDevice::init("Wine Cabinet");
-    BLEServer *pServer = BLEDevice::createServer();
-    BLEService *pService = pServer->createService(SERVICE_UUID);
-    BLECharacteristic *pCharacteristic = pService->createCharacteristic(
-                                         CHARACTERISTIC_UUID,
-                                         BLECharacteristic::PROPERTY_READ |
-                                         BLECharacteristic::PROPERTY_WRITE
-                                       );
-    pCharacteristic->setValue("@Lagodish");
-    pService->start();
-    // BLEAdvertising *pAdvertising = pServer->getAdvertising();  // this still is working for backward compatibility
-    BLEAdvertising *pAdvertising = BLEDevice::getAdvertising();
-    pAdvertising->addServiceUUID(SERVICE_UUID);
-    pAdvertising->setScanResponse(true);
-    pAdvertising->setMinPreferred(0x06);  // functions that help with iPhone connections issue
-    pAdvertising->setMinPreferred(0x12);
-    BLEDevice::startAdvertising();
-    //BLEDevice::deinit(true);
-
-  }
+ 
   return proceed;
 }
 
@@ -183,7 +161,6 @@ TOGGLE(Temp_mode,TempMenu,text_4,action2,enterEvent,noStyle
 TOGGLE(Wireless,setWireless,text_6,action1,enterEvent,noStyle
   ,VALUE(text_9,0,doNothing,noEvent)
   ,VALUE("WiFi",1,doNothing,noEvent)
-  ,VALUE("BLE",2,action6,enterEvent)
 );
 
 
