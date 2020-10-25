@@ -10,6 +10,12 @@ uint8_t briG = 0;
 uint8_t briB = 0;
 uint8_t briW = 0;
 
+//Display
+const char DEGREE_SYMBOL[] = { 0xB0, '\0' };
+const char ALERT_SYMBOL[] = { 71, '\0' }; //DOTO как в Aplle
+const char wifi_SYMBOL[] = { 80, '\0' }; //Заменить значок (не вытянутый)
+const char setup_SYMBOL[] = { 66, '\0' };
+
 //boot
 bool ts = false;
 
@@ -68,6 +74,3 @@ uint8_t blink=0;
 double setted_temp = 0.0;
 double temp = 0.0;
 double tempPrint =0.0;
-
-#define SERVICE_UUID        "95e95e3e-6cd6-4bf1-8e65-8faca66d90b0"
-#define CHARACTERISTIC_UUID "6cefc71f-c7c1-4344-8610-1b5e6e1b0eda"

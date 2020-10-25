@@ -9,7 +9,6 @@ void setup() {
    while(!Serial);
 
    i2c_mutex = xSemaphoreCreateMutex();
-   antenna_mutex = xSemaphoreCreateMutex();
       
    xTaskCreate(
       DataStorage,

@@ -219,12 +219,6 @@ NAVROOT(nav,mainMenu,MAX_DEPTH,in,out);
 //when menu is suspended
 result MainScreen(menuOut& o,idleEvent e) {
   o.clear();
-  const char DEGREE_SYMBOL[] = { 0xB0, '\0' };
-  const char ALERT_SYMBOL[] = { 71, '\0' }; //DOTO как в Aplle
-  const char bluetooth_SYMBOL[] = { 74, '\0' };
-  const char wifi_SYMBOL[] = { 80, '\0' }; //Заменить значок (не вытянутый)
-  const char setup_SYMBOL[] = { 66, '\0' };
-
   if(showTemp){tempPrint = setted_temp;}
   else{
     if(Temp_mode){tempPrint = temp_cache;}
@@ -256,9 +250,8 @@ result MainScreen(menuOut& o,idleEvent e) {
     u8g2.setFont(u8g2_font_open_iconic_embedded_2x_t); //{Eeeeeeeeeeeeeeeee}
     if(timer_1>0){u8g2.drawUTF8(8, 64, setup_SYMBOL);}
     if(Wireless==1){u8g2.drawUTF8(72, 64, wifi_SYMBOL);}
-    if(Wireless==2){u8g2.drawUTF8(72, 64, bluetooth_SYMBOL);}
     //u8g2.drawUTF8(72, 64, SYMBOL);
-    if(Hysteresis(temp_cache)){u8g2.drawUTF8(106, 64, ALERT_SYMBOL);}
+    if(err_flag){u8g2.drawUTF8(106, 64, ALERT_SYMBOL);}
     break;}
     case idleEnd:/*o.println("resuming menu.");*/mainScreenOn=false;u8g2.setFont(fontName);break;
   }
