@@ -12,6 +12,7 @@
 RtcDS3231<TwoWire> Rtc(Wire);
 Preferences preferences;
 
+
 GButton butt1(GP1); //GButton touch(BTN_PIN, LOW_PULL, NORM_OPEN);
 GButton butt2(GP2);
 GButton butt3(GP3);
@@ -70,32 +71,33 @@ const colorDef<uint8_t> colors[6] MEMMODE={
   {{1,1},{1,0,0}},//titleColor
 };
 
-result action6(eventMask e,navNode& nav, prompt &item) {
+result action9(eventMask e,navNode& nav, prompt &item);
+result action8(eventMask e,navNode& nav, prompt &item);
+result action7(eventMask e,navNode& nav, prompt &item);
 
+result action6(eventMask e,navNode& nav, prompt &item) {
   if(Wireless==0){    //No
 
   }
   if(Wireless==1){    //WiFi
 
   }
- 
   return proceed;
 }
 
 result action5(eventMask e,navNode& nav, prompt &item) {
-    char userTime[8];
-    userTime[0] = h_rtc / 10 + '0';
-    userTime[1] = h_rtc % 10 + '0';
-    userTime[2] = ':';
-    userTime[3] = min_rtc / 10 + '0';
-    userTime[4] = min_rtc % 10 + '0';
-    userTime[5] = ':';
-    userTime[6] = '0';
-    userTime[7] = '0';
-  
-    RtcDateTime manual = RtcDateTime(__DATE__, userTime);
-    Rtc.SetDateTime(manual);
-    return proceed;
+  char userTime[8];
+  userTime[0] = h_rtc / 10 + '0';
+  userTime[1] = h_rtc % 10 + '0';
+  userTime[2] = ':';
+  userTime[3] = min_rtc / 10 + '0';
+  userTime[4] = min_rtc % 10 + '0';
+  userTime[5] = ':';
+  userTime[6] = '0';
+  userTime[7] = '0';
+  RtcDateTime manual = RtcDateTime(__DATE__, userTime);
+  Rtc.SetDateTime(manual);
+  return proceed;
 }
 
 result action4(eventMask e,navNode& nav, prompt &item) {
@@ -119,12 +121,10 @@ result action2(eventMask e,navNode& nav, prompt &item) {
   else{ //  F
     setted_temp = int((setted_temp*9/5)+32);
   }
-
   preferences.begin("VineBoxData", false);
   preferences.putDouble("setted_temp",setted_temp);
   preferences.putBool("Temp_mode",Temp_mode);
   preferences.end();
-
   return proceed;
 }
 
@@ -133,21 +133,18 @@ result action1(eventMask e,navNode& nav, prompt &item) {
   preferences.putUInt("BRT_max",BRT_max);
   preferences.putUInt("SPD_max",SPD_max);
   preferences.putUInt("RGB_set",RGB_set);
-  preferences.putBool("RGBCtrl",RGBCtrl);
-  preferences.putBool("LightCtrl",LightCtrl);
   preferences.putBool("FanCtrl",FanCtrl);
   preferences.putUInt("Wireless",Wireless);
   preferences.end();
-
   return proceed;
 }
 
-TOGGLE(RGBCtrl,setRGBLight,text_24,action1,enterEvent,noStyle
+TOGGLE(RGBCtrl,setRGBLight,text_24,action8,enterEvent,noStyle
   ,VALUE(text_8,HIGH,doNothing,noEvent)
   ,VALUE(text_9,LOW,doNothing,noEvent)
 );
 
-TOGGLE(LightCtrl,setLight,text_2,action1,enterEvent,noStyle
+TOGGLE(LightCtrl,setLight,text_2,action7,enterEvent,noStyle
   ,VALUE(text_8,HIGH,doNothing,noEvent)
   ,VALUE(text_9,LOW,doNothing,noEvent)
 );
@@ -176,7 +173,7 @@ TOGGLE(PERF,PerformanceMenu,text_7,action4,enterEvent,noStyle
   ,VALUE(text_21,1,doNothing,noEvent)
 );
 
-MENU(LightMenu,text_16,doNothing,noEvent,noStyle
+MENU(LightMenu,text_16,action9,enterEvent,noStyle
   ,SUBMENU(setLight)
   ,FIELD(BRT_max,text_18,"%",0,100,10,1,action1,enterEvent,wrapStyle)
   ,SUBMENU(setRGBLight)
@@ -265,4 +262,34 @@ result MainScreen(menuOut& o,idleEvent e) {
   }
 
   return proceed;
+}
+
+result action9(eventMask e,navNode& nav, prompt &item) { 
+    if(LightCtrl){LightMenu[1].enabled=enabledStatus;}
+    else{LightMenu[1].enabled=disabledStatus;}
+
+    if(RGBCtrl){LightMenu[3].enabled=enabledStatus;}
+    else{LightMenu[3].enabled=disabledStatus;}
+
+    return proceed;
+}
+
+result action8(eventMask e,navNode& nav, prompt &item) { 
+    if(RGBCtrl){LightMenu[3].enabled=enabledStatus;}
+    else{LightMenu[3].enabled=disabledStatus;}
+  
+    preferences.begin("VineBoxData", false);
+    preferences.putBool("RGBCtrl",RGBCtrl);
+    preferences.end();
+    return proceed;
+}
+
+result action7(eventMask e,navNode& nav, prompt &item) { 
+    if(LightCtrl){LightMenu[1].enabled=enabledStatus;}
+    else{LightMenu[1].enabled=disabledStatus;}
+
+    preferences.begin("VineBoxData", false);
+    preferences.putBool("LightCtrl",LightCtrl);
+    preferences.end();
+    return proceed;
 }

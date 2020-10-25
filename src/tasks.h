@@ -10,48 +10,7 @@ SemaphoreHandle_t i2c_mutex;
 SemaphoreHandle_t antenna_mutex;
 
 void IRAM_ATTR resetModule(){esp_restart();}
-
-void setRGB(int color){
-    uint8_t _r =0;
-    uint8_t _g =0;
-    uint8_t _b =0;
-
-    if (color <= 255) {						// красный макс, зелёный растёт
-		_r = 255;
-		_g = color;
-		_b = 0;
-	}
-	else if (color > 255 && color <= 510) {		// зелёный макс, падает красный 
-		_r = 510 - color;
-		_g = 255;
-		_b = 0;
-	}
-	else if (color > 510 && color <= 765) {		// зелёный макс, растёт синий
-		_r = 0;
-		_g = 255;
-		_b = color - 510;
-	}
-	else if (color > 765 && color <= 1020) {	// синий макс, падает зелёный
-		_r = 0;
-		_g = 1020 - color;
-		_b = 255;
-	}
-	else if (color > 1020 && color <= 1275) { 	// синий макс, растёт красный
-		_r = color - 1020;
-		_g = 0;
-		_b = 255;
-	}
-	else if (color > 1275 && color <= 1530) {	// красный макс, падает синий
-		_r = 255;
-		_g = 0;
-		_b = 1530 - color;
-	}
-
-    ledcWrite(3, _b); //briB
-    ledcWrite(1, _r); //briR
-    ledcWrite(2, _g); //briG
-}
-
+void setRGB(int color);
 void LightCtrlTask( void * parameter )
 {
     Serial.println("Light");
@@ -95,8 +54,6 @@ void DataStorage( void * parameter)
 {
     Serial.println("DataStorage");
     preferences.begin("VineBoxData", false);
-    //preferences.clear(); // Удаляем все настройки под заданным пространством имён
-    //preferences.remove("counter"); // Удаляем отдельный ключ
     if(preferences.getBool("StartVB", false)==false){
         preferences.putBool("StartVB",true);
         preferences.putUInt("BRT_Disp",50);
@@ -184,9 +141,14 @@ void FanCtrlTask( void * parameter)
     Serial.println("FanCtrl");
     pinMode(F1 ,OUTPUT);
     pinMode(F2 ,OUTPUT);
-    digitalWrite(F1,LOW);
-    digitalWrite(F2,LOW);
     while(1){
+    if(FanCtrl){
+        digitalWrite(F1,HIGH);
+        digitalWrite(F2,HIGH);}
+    else{
+        digitalWrite(F1,LOW);
+        digitalWrite(F2,LOW);}
+    
     vTaskDelay(1000/portTICK_PERIOD_MS);        
     }
 
@@ -227,7 +189,7 @@ void RtcTask( void * parameter)
     m_rtc = now.Month();
     y_rtc = now.Year();
     temp_rtc = double( temp.AsFloatDegC() );
-    if(y_rtc<1000){mainMenu[0].enabled=disabledStatus; }
+    if(y_rtc<1000){mainMenu[0].enabled=disabledStatus; } 
     else{mainMenu[0].enabled=enabledStatus;}
     err_flag = false;
     }
@@ -264,7 +226,7 @@ void StaticTask( void * parameter)
     Serial.println("Static");
 
     while(1){
-    vTaskDelay(1000/portTICK_PERIOD_MS);
+    vTaskDelay(5000/portTICK_PERIOD_MS);
     }
 
     Serial.println("Ending Static");
@@ -337,4 +299,45 @@ void DisplayTask( void * parameter)
 
     Serial.println("Ending Display");
     vTaskDelete( NULL );
+}
+
+void setRGB(int color){
+    uint8_t _r =0;
+    uint8_t _g =0;
+    uint8_t _b =0;
+
+    if (color <= 255) {						// красный макс, зелёный растёт
+		_r = 255;
+		_g = color;
+		_b = 0;
+	}
+	else if (color > 255 && color <= 510) {		// зелёный макс, падает красный 
+		_r = 510 - color;
+		_g = 255;
+		_b = 0;
+	}
+	else if (color > 510 && color <= 765) {		// зелёный макс, растёт синий
+		_r = 0;
+		_g = 255;
+		_b = color - 510;
+	}
+	else if (color > 765 && color <= 1020) {	// синий макс, падает зелёный
+		_r = 0;
+		_g = 1020 - color;
+		_b = 255;
+	}
+	else if (color > 1020 && color <= 1275) { 	// синий макс, растёт красный
+		_r = color - 1020;
+		_g = 0;
+		_b = 255;
+	}
+	else if (color > 1275 && color <= 1530) {	// красный макс, падает синий
+		_r = 255;
+		_g = 0;
+		_b = 1530 - color;
+	}
+
+    ledcWrite(3, _b); //briB
+    ledcWrite(1, _r); //briR
+    ledcWrite(2, _g); //briG
 }
