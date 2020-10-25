@@ -23,6 +23,15 @@ void IRAM_ATTR resetModule(){esp_restart();}
 void LightCtrlTask( void * parameter )
 {
     Serial.println("Light");
+    ledcSetup(1, freq, resolution);
+    ledcSetup(2, freq, resolution);
+    ledcSetup(3, freq, resolution);
+    ledcSetup(4, freq, resolution);
+
+    ledcAttachPin(R, 1);
+    ledcAttachPin(G, 2);
+    ledcAttachPin(B, 3);
+    ledcAttachPin(W, 4);
 
     while(1){
     ledcWrite(3, 0); //briB
@@ -54,6 +63,7 @@ void DataStorage( void * parameter)
         preferences.putBool("Temp_mode",HIGH);
         preferences.putBool("LightCtrl",HIGH);
         preferences.putBool("FanCtrl",HIGH);
+        ts = true;
     }
     BRT_Disp = preferences.getUInt("BRT_Disp");
     BRT_max = preferences.getUInt("BRT_max");
@@ -105,6 +115,8 @@ void TempRead( void * parameter)
 void CompCtrlTask( void * parameter)
 {
     Serial.println("CompCtrl");
+    pinMode(Comp ,OUTPUT);
+    digitalWrite(Comp,LOW);
     while(temp_cache<5||temp_cache>64){
     vTaskDelay(1000/portTICK_PERIOD_MS);
     }
@@ -123,6 +135,10 @@ void CompCtrlTask( void * parameter)
 void FanCtrlTask( void * parameter)
 {
     Serial.println("FanCtrl");
+    pinMode(F1 ,OUTPUT);
+    pinMode(F2 ,OUTPUT);
+    digitalWrite(F1,LOW);
+    digitalWrite(F2,LOW);
     while(1){
     vTaskDelay(1000/portTICK_PERIOD_MS);        
     }
@@ -156,17 +172,17 @@ void RtcTask( void * parameter)
     Rtc.Enable32kHzPin(false);
     Rtc.SetSquareWavePin(DS3231SquareWavePin_ModeNone);
 
-    //RtcDateTime compiled = RtcDateTime(__DATE__, __TIME__);
-
-    //Rtc.SetDateTime(compiled);
     xSemaphoreGive(i2c_mutex);
 
     while(1){
     xSemaphoreTake(i2c_mutex, portMAX_DELAY);
 
     if(!Rtc.IsDateTimeValid()){
-    Serial.println("RTC ERR, lets set the time!");
-    //Rtc.SetDateTime(compiled);
+    Serial.println("RTC ERR!");
+    if(ts){
+    RtcDateTime compiled = RtcDateTime(__DATE__, __TIME__);
+    Rtc.SetDateTime(compiled);
+    ts=false;}
     err_flag = true;}
     else{
     RtcDateTime now = Rtc.GetDateTime();
@@ -347,341 +363,3 @@ void ServerOTA( void * parameter)
     Serial.println("Ending ServerOTA");
     vTaskDelete( NULL );
 }
-
-/*
-void BLE( void * parameter)
-{
-    uint64_t chipid; 
-    chipid=ESP.getEfuseMac();
-    Serial.printf("ESP32 Chip ID = %04X",(uint16_t)(chipid>>32));
-
-    BluetoothSerial ESP_BT; //Object for Bluetooth
-    //ESP_BT.esp_ble_power_type_t(9);
-    //ESP_BT.esp_power_level_t(7);
-    //ESP_BT.esp_ble_tx_power_set(ESP_BLE_PWR_TYPE_ADV, ESP_PWR_LVL_P9);
-    ESP_BT.begin("VineBox_" + String((uint16_t)(chipid>>32))); //Name of your Bluetooth Signal
-    ESP_BT.println("BLE works!");
-
-
-    while(1){ 
-    if (ESP_BT.available()) {
-        
-        String str = ESP_BT.readString();
-        Serial.print(str);
-        //u8g2log.print(str);
-    
-    if(str.equals("help\r\n")||str.equals("h\r\n")||str.equals("Help\r\n")){
-        ESP_BT.println("Available commands: \r\nhelp/h (-a), \r\nset/s, \r\nflags/f, \r\ntime, \r\ntemp/t,\r\nlight/l,\r\nota -on/off,\r\n reboot"); 
-    }
-
-    if(str.equals("help -a\r\n")||str.equals("h -a\r\n")||str.equals("Help -a\r\n")){
-        ESP_BT.println("More cmnd: \r\nerr_flag, \r\nds18, \r\nds18_set, \r\nwifi, \r\nflag_reset, \r\nmax_br, \r\nmin_br, \r\nl, beep \r\n"); //TODO lag_rest
-    }
-
-    if(str.equals("beep\r\n")){
-        ESP_BT.println("OK!"); 
-      //  march = true;
-    }
-
-    if(str.equals("Ds18_set\r\n")||str.equals("ds18_set\r\n")){
-                //numberOfDevices
-        ESP_BT.println("With heatter? Y/n"); //TODO
-        bool test = true;
-        while (test)
-        {           
-            if (ESP_BT.available())
-           {         
-         String str = ESP_BT.readString();
-
-         if(str.equals("Y\r\n")||str.equals("y\r\n")){
-                ESP_BT.println("With heatter");
-                test = false;
-          }
-          else if(str.equals("N\r\n")||str.equals("n\r\n")){
-            ESP_BT.println("Without heatter!");
-            test = false;
-          }        
-        }
-             //......................................
-    }
-    }
-
-        if(str.equals("Fade\r\n")||str.equals("fade\r\n")){
-        fade = !fade;
-           }
- 
-        if(str.equals("Wifi\r\n")||str.equals("wifi\r\n")){
-        ESP_BT.println("With heatter? Y/n"); //TODO
-        ESP_BT.println("Please write your WIFI name, pass"); //TODO 
-        // EEPROM.writeString(bssid_e/pass_e, gratitude); 
-        //......................................
-           }
-
-        if(str.equals("ds18\r\n")||str.equals("ds18b20\r\n")||str.equals("Ds18\r\n")||str.equals("Ds18b20\r\n")){
-         int val[1];
-        ESP_BT.println("Please wrie numberOfDevices"); 
-        for(int i=0; i < 1; i++){
-        val[i]=0;
-        while (!ESP_BT.available())
-        {
-         vTaskDelay(10);   
-        }
-                       
-        val[i]=ESP_BT.parseInt();
-
-        if(val[i]==0){
-            i--;
-            continue;
-        }
-        if(val[i]>100){
-            val[i]=100;
-        }
-        if(val[i]<0){
-            val[i]=1;
-        }
-
-
-        }
-        EEPROM.write(numberOfDevices_e,val[0]); //TODO fix indexs
-        EEPROM.commit();
-        numberOfDevices=val[0];
-        ESP_BT.println("OK!"); 
-    }
-
-    if(str.equals("err_flag\r\n")){
-        ESP_BT.print("Please write def. delay time (ms). (1-100)");
-        int val[1];
-
-        for(int i=0; i < 1; i++){
-        val[i]=0;
-        while (!ESP_BT.available())
-        {
-         vTaskDelay(10);   
-        }
-                       
-        val[i]=ESP_BT.parseInt();
-
-        if(val[i]==0){
-            i--;
-            continue;
-        }
-        if(val[i]>100){
-            val[i]=100;
-        }
-        if(val[i]<0){
-            val[i]=1;
-        }
-
-
-        }
-
-        def_time=val[0];
-        
-        }
-    
-
-    if(str.equals("Ota -on\r\n")||str.equals("ota -on\r\n")||str.equals("OTA -on\r\n")||str.equals("OTA\r\n")){
-        if (EEPROM.begin(EEPROM_SIZE))
-            {
-            EEPROM.write(ota_e,true);
-            EEPROM.commit();
-            ESP_BT.println("OTA ON! Reboot..."); 
-            vTaskDelay(100);
-            resetModule();
-        }
-        else{
-            ESP_BT.println("EEPROM ERROR!"); 
-        }
-        
-    }
-
-        if(str.equals("Ota -off\r\n")||str.equals("ota -off\r\n")||str.equals("OTA -off\r\n")){
-        if (EEPROM.begin(EEPROM_SIZE))
-            {
-            EEPROM.write(ota_e,false);
-            EEPROM.commit();
-            ESP_BT.println("OTA OFF!"); 
-        }
-        else{
-            ESP_BT.println("EEPROM ERROR!"); 
-        }
-        
-    }
-
-    if(str.equals("Light\r\n")||str.equals("l\r\n")||str.equals("light\r\n")){
-
-        ESP_BT.print("Please write r,g,b,w, one by one. (0-255)");
-        int val[4];
-
-        for(int i=0; i < 4; i++){
-        val[i]=0;
-        while (!ESP_BT.available())
-        {
-         vTaskDelay(10);   
-        }
-                       
-        val[i]=ESP_BT.parseInt();
-
-        if(val[i]==0){
-            i--;
-            continue;
-        }
-        if(val[i]>255){
-            val[i]=255;
-        }
-        if(val[i]<0){
-            val[i]=0;
-        }
-
-        }
-
-        briR = val[0];
-        briG = val[1];
-        briB = val[2];
-        briW = val[3];
-
-        ESP_BT.println("OK!"); 
-    }
-
-    if(str.equals("temp\r\n")||str.equals("t\r\n")){
-        if(numberOfDevices==0){
-            ESP_BT.print("No devices found!");
-        }
-        else{
-            for(int i=0;i<numberOfDevices; i++)
-                {
-                ESP_BT.print("Temp[");
-                ESP_BT.print(i);
-                ESP_BT.print("]: ");
-                ESP_BT.print(tempC[i]);
-                ESP_BT.print(" C");
-                ESP_BT.println("");
-                }
-                    if(Rtc.IsDateTimeValid()){
-                    ESP_BT.printf("Temp[RTC]: %.2f C", temp_rtc);
-                    ESP_BT.println("");
-                }
-            }
-            }
-    if(str.equals("flags\r\n")||str.equals("f\r\n")){
-
-        ESP_BT.print("Flags: err[");
-        ESP_BT.print(err_flag);
-        ESP_BT.print("],light[");
-        ESP_BT.print(light_flag);
-        ESP_BT.print("],heater[");
-        ESP_BT.print(heater_flag);
-        ESP_BT.print("],comp[");
-        ESP_BT.print(comp_flag);
-        ESP_BT.print("],rgb[");
-        ESP_BT.print(rgb_flag);
-        ESP_BT.print("],fan1[");
-        ESP_BT.print(fan1_flag);
-        ESP_BT.print("],fan2[");
-        ESP_BT.print(fan2_flag);
-        ESP_BT.print("],beeper[");
-        ESP_BT.print(beeper_flag);
-        ESP_BT.print("]");
-        ESP_BT.println("");
-    }
-
-    if(str.equals("time\r\n")||str.equals("Time\r\n")||str.equals("Time -i\r\n")||str.equals("time -i\r\n"))
-    {
-        if(str.equals("Time -i\r\n")||str.equals("time -i\r\n")){
-            
-        ESP_BT.print("Time: ");
-        ESP_BT.print(h_rtc);
-        ESP_BT.print(":");
-        ESP_BT.print(min_rtc);
-        ESP_BT.print(":");
-        ESP_BT.print(sec_rtc);
-        ESP_BT.println("");
-
-        }
-        else{
-        //str.equalsIgnoreCase("*-r*")''
-        if((h_rtc>24)||(min_rtc>59)||(h_rtc<0)||(min_rtc<0)){
-            ESP_BT.print("RTC Err!");//(h_rtc>24)||(min_rtc>59)||(sec_rtc>59)||(d_rtc>33)||(m_rtc>13)
-        }
-        else{
-        ESP_BT.print("Time: ");
-        ESP_BT.print(h_rtc);
-        ESP_BT.print(":");
-        ESP_BT.print(min_rtc);
-        ESP_BT.print(":");
-        ESP_BT.print(sec_rtc);
-        ESP_BT.println("");
-        }
-        }
-    }
-
-    if(str.equals("TimeSet\r\n")||str.equals("ts\r\n"))
-    {
-        set_t = true;
-    }
-
-    if(str.equals("set\r\n")||str.equals("s\r\n"))
-    {
-        if (!Rtc.IsDateTimeValid()) 
-        {
-            ESP_BT.println("Couldn't find RTC");
-            err_flag = true;
-            err_str += "RTC, ";
-        }
-        else
-        {
-            ESP_BT.print("Please write h,m one by one");
-            int set[2];
-            for(int i=0; i< 2; i++){
-
-                while (!ESP_BT.available())
-                {
-                    vTaskDelay(10);   
-                }
-                       
-            set[i]=ESP_BT.parseInt();
-
-            if(set[i]==0){
-                i--;
-                continue;
-            }
-        }
-        
-        ESP_BT.printf("Time: %d:%d", set[0],set[1]);
-        ESP_BT.println("Correct? Y/n");
-        bool test = true;
-        while (test)
-        {           
-            if (ESP_BT.available())
-           {         
-         String str = ESP_BT.readString();
-
-         if(str.equals("Y\r\n")||str.equals("y\r\n")){
-                set_time(set[0],set[1]);
-                ESP_BT.println("Setted!");
-                test = false;
-          }
-          else if(str.equals("N\r\n")||str.equals("n\r\n")){
-            ESP_BT.println("Aborted!");
-            test = false;
-          }        
-        }
-        }              
-     }       
-    }
-
-    if(str.equals("reboot\r\n")||str.equals("Reboot\r\n")){
-            ESP_BT.println("Reboot!");
-            vTaskDelay(500);
-            resetModule();        
-    }
-    
-                                                                 
-  }
-        vTaskDelay(300);
-    }
-    
-    Serial.println("Ending BLE");
-    vTaskDelete( NULL );
-}
-*/

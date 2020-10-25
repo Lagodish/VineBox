@@ -7,23 +7,10 @@ void setup() {
 
    Serial.begin(9600); //Uart
    while(!Serial);
+
    i2c_mutex = xSemaphoreCreateMutex();
    antenna_mutex = xSemaphoreCreateMutex();
-
-   ledcSetup(1, freq, resolution);
-   ledcSetup(2, freq, resolution);
-   ledcSetup(3, freq, resolution);
-   ledcSetup(4, freq, resolution);
-
-   ledcAttachPin(R, 1);
-   ledcAttachPin(G, 2);
-   ledcAttachPin(B, 3);
-   ledcAttachPin(W, 4);
-
-   pinMode(F1 ,OUTPUT);       digitalWrite(F1,LOW);
-   pinMode(F2 ,OUTPUT);       digitalWrite(F2,LOW);
-   pinMode(Comp ,OUTPUT);     digitalWrite(Comp,LOW);
- 
+    
    if(ota){
    xTaskCreate(
       ServerOTA,          
@@ -63,14 +50,6 @@ void setup() {
       FanCtrlTask,
       "FanCtrl",
       3000,
-      NULL,             /* Parameter passed as input of the task */
-      1,                /* Priority of the task. */
-      NULL);            /* Task handle. */
-
-   xTaskCreate(
-      HeaterCtrlTask,
-      "HeaterCtrl",
-      1000,
       NULL,             /* Parameter passed as input of the task */
       1,                /* Priority of the task. */
       NULL);            /* Task handle. */
