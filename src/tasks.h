@@ -95,7 +95,6 @@ void TempRead( void * parameter)
     DeviceAddress tempDeviceAddress;
     sensors.begin();
     sensors.setResolution(12);
-    vTaskDelay(1000/portTICK_PERIOD_MS);
     while(1){
     sensors.requestTemperatures();
     for(int i=0;i<=numberOfDevices; i++){
