@@ -171,7 +171,7 @@ void RtcTask( void * parameter)
     RtcDateTime compiled = RtcDateTime(__DATE__, __TIME__);
     Rtc.SetDateTime(compiled);
     ts=false;}
-    err_flag = true;}
+    err_flag=true;}
     else{
     RtcDateTime now = Rtc.GetDateTime();
 	RtcTemperature temp = Rtc.GetTemperature();
@@ -183,7 +183,7 @@ void RtcTask( void * parameter)
     m_rtc = now.Month();
     y_rtc = now.Year();
     temp_rtc = double( temp.AsFloatDegC() );
-    if(y_rtc<1000){mainMenu[0].enabled=disabledStatus; } 
+    if(y_rtc<1000){mainMenu[0].enabled=disabledStatus; err_flag=true;} 
     else{mainMenu[0].enabled=enabledStatus;}
     err_flag = false;
     }
@@ -230,8 +230,11 @@ void StaticTask( void * parameter)
 void DisplayTask( void * parameter)
 {
     Serial.println("Display");
-    xSemaphoreTake(i2c_mutex, portMAX_DELAY);
-    
+    attachInterrupt(GP1, isr, CHANGE);
+    attachInterrupt(GP2, isr, CHANGE);
+    attachInterrupt(GP3, isr, CHANGE);
+    attachInterrupt(GP4, isr, CHANGE);
+    xSemaphoreTake(i2c_mutex, portMAX_DELAY);    
     Wire.begin();
     u8g2.begin();
     u8g2.enableUTF8Print();	
@@ -241,7 +244,6 @@ void DisplayTask( void * parameter)
     nav.idleTask=MainScreen;//point a function to be used when menu is suspended
     nav.timeOut=30;
     nav.idleOn(MainScreen);
-
     xSemaphoreGive(i2c_mutex);
    
     while(1){       
@@ -251,7 +253,9 @@ void DisplayTask( void * parameter)
     butt4.tick();
     if(tempC[numberOfDevices]<64&&tempC[numberOfDevices]>0){
     temp_cache=tempC[numberOfDevices];
+    if(!err_flag){err_flag=false;}
     }
+    else{err_flag=true;}
 
     if (butt1.isClick()){butt1_l = true;nav.doNav(enterCmd);Serial.println("Enter");}else{butt1_l = false;}
     if (butt2.isClick()){butt2_l = true;nav.doNav(upCmd);Serial.println("Up");}else{butt2_l = false;}
@@ -288,7 +292,7 @@ void DisplayTask( void * parameter)
 
     if(showTemp){timer_1++;if(timer_1>101){timer_1=0;showTemp=false; writeTemp();}}
     else{timer_1=0;showTemp=false;}
-    vTaskDelay(30/portTICK_PERIOD_MS);
+    vTaskDelay(50/portTICK_PERIOD_MS);
     }
 
     Serial.println("Ending Display");

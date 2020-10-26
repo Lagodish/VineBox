@@ -18,6 +18,13 @@ GButton butt2(GP2);
 GButton butt3(GP3);
 GButton butt4(GP4);
 
+void isr() {
+    butt1.tick();
+    butt2.tick();
+    butt3.tick();
+    butt4.tick();
+}
+
 using namespace Menu;
 
 #define MAX_DEPTH 3
