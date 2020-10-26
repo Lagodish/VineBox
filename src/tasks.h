@@ -90,26 +90,21 @@ void DataStorage( void * parameter)
 void TempRead( void * parameter)
 {
     Serial.println("TempRead");
-    OneWire oneWire(oneWireBus);// Setup a oneWire instance to communicate with any OneWire devices
-    DallasTemperature sensors(&oneWire);// Pass our oneWire reference to Dallas Temperature sensor 
-    DeviceAddress tempDeviceAddress; // We'll use this variable to store a found device address
-    sensors.begin();// Start the DS18B20 sensor
-  
+    OneWire oneWire(oneWireBus);
+    DallasTemperature sensors(&oneWire);
+    DeviceAddress tempDeviceAddress;
+    sensors.begin();
+    sensors.setResolution(12);
+
     while(1){
     sensors.requestTemperatures();
     for(int i=0;i<=numberOfDevices; i++){
-
-    if(sensors.getAddress(tempDeviceAddress, i)){// Search the wire for address
-      tempC[i] = sensors.getTempC(tempDeviceAddress);// Print the data
-      //Serial.print("Temp[");
-      //Serial.print(i);
-      //Serial.print("]: ");
-      //Serial.print(tempC[i]);
-      //Serial.print(" C");
-      //Serial.println("");
+    if(sensors.getAddress(tempDeviceAddress, i)){
+      tempC[i] = sensors.getTempC(tempDeviceAddress);
       //temp_cache=temp_cache+tempC[i];
     }}
-    vTaskDelay(1000/portTICK_PERIOD_MS);
+    for(int i=0;i<7;i++){
+    vTaskDelay(1000/portTICK_PERIOD_MS);}
     }
 
     Serial.println("Ending TempRead");
