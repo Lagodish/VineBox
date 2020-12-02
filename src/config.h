@@ -2,8 +2,7 @@
 
 /////////////////////// Setup Config  //////////////////////
 
-#define  language_RU    //Russian 
-//#define language_EU   //English
+//#define language_EU   //English, Russian if comended
 
 #define  DualZone        //Dual Zone Wine Fridges
 
@@ -34,9 +33,7 @@
   #define text_22   "Celsius"
   #define text_23   "Fahrenheit"
   #define text_24    "RGB: "
-#endif
-
-#ifdef language_RU
+#else
   #define text_1    "Настройки"
   #define text_2    "Главная: "
   #define text_3    "Авто: "
