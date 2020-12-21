@@ -204,6 +204,18 @@ MENU(timeMenu,text_12,doNothing,noEvent,noStyle
   ,EXIT(text_11)
 );
 
+TOGGLE(AutoBRT,setAutoBRT,text_26,action1,enterEvent,noStyle
+  ,VALUE(text_9,0,doNothing,noEvent)
+  ,VALUE(text_8,1,doNothing,noEvent)
+);
+
+
+MENU(DispMenu,text_25,doNothing,noEvent,noStyle
+  ,FIELD(BRT_Disp,text_10," %",0,100,10,0,action3,enterEvent,noStyle)
+  ,SUBMENU(setAutoBRT)
+  ,EXIT(text_11)
+);
+
 
 //TODO работа на нагрев (если в комнате температура меньше чем нужно) + счетчик наработки
 MENU(mainMenu, text_1 ,doNothing,noEvent,noStyle
@@ -213,13 +225,16 @@ MENU(mainMenu, text_1 ,doNothing,noEvent,noStyle
   ,SUBMENU(PerformanceMenu)
   ,SUBMENU(setWireless)
   ,SUBMENU(TempMenu)
-  ,FIELD(BRT_Disp,text_10," %",0,100,10,0,action3,enterEvent,noStyle)
+  ,SUBMENU(DispMenu)
   ,EXIT(text_11)
 );
 
-//serialIn serial(Serial1);
-//MENU_INPUTS(in, NONE);  //&serial
+//serialIn serial(Serial);
+//MENU_INPUTS(in,&serial);
+
 chainStream<0> in(NULL);//<-- this creates a NULL stream
+
+
 
 MENU_OUTPUTS(out,MAX_DEPTH
   ,U8G2_OUT(u8g2,colors,fontX,fontY,offsetX,offsetY,{0,0,U8_Width/fontX,U8_Height/fontY})

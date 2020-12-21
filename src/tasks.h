@@ -278,7 +278,7 @@ void DisplayTask( void * parameter)
     setted_temp-=1;
     if(setted_temp<41){setted_temp=41;}}
     showTemp=true;timer_1=1;}
-
+    
     xSemaphoreTake(i2c_mutex, portMAX_DELAY);
     nav.doInput();
     //if (nav.changed(0))

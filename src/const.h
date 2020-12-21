@@ -59,13 +59,14 @@ bool FanCtrl=LOW;
 bool Temp_mode=HIGH;
 bool mainScreenOn = true;
 bool showTemp = false;
+bool Wireless=false;
+bool AutoBRT=false;
 
 bool butt1_l = false;
 bool butt2_l = false;
 bool butt3_l = false;
 bool butt4_l = false;
 
-uint8_t Wireless=0;
 uint8_t PERF=0;
 uint8_t BRT_max = 0;
 uint8_t RGB_set = 0;

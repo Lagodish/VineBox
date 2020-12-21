@@ -33,6 +33,8 @@
   #define text_22   "Celsius"
   #define text_23   "Fahrenheit"
   #define text_24    "RGB: "
+  #define text_25    "Display"
+  #define text_26    "Auto Brt"
 #else
   #define text_1    "Настройки"
   #define text_2    "Главная: "
@@ -48,16 +50,18 @@
   #define text_12   "Время"
   #define text_13   "Время"
   #define text_14   "Дата"
-  #define text_15   "Верниляторы" 
+  #define text_15   "Вентиляторы" 
   #define text_16   "Подсветка"
   #define text_17   "Обороты"
   #define text_18   "Яркость"
   #define text_19   "Эко"
   #define text_20   "Средний"
-  #define text_21   "Высокий"
+  #define text_21   "Производительный"
   #define text_22   "Цельсия"
   #define text_23   "Фаренгейта"
   #define text_24    "RGB: "
+  #define text_25    "Дисплей"
+  #define text_26    "Авто Ярк."
 #endif
 
 #ifdef DualZone
