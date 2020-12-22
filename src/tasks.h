@@ -3,7 +3,7 @@
 #include <OneWire.h>
 #include <DallasTemperature.h>
 #include <WiFi.h>
-#include <Preferences.h> //TODO NVS
+#include <Preferences.h> 
 #include <display.h>
 
 SemaphoreHandle_t i2c_mutex;
