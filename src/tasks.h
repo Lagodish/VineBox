@@ -235,7 +235,7 @@ void DisplayTask( void * parameter)
     attachInterrupt(GP3, isr, CHANGE);
     attachInterrupt(GP4, isr, CHANGE);
     xSemaphoreTake(i2c_mutex, portMAX_DELAY);    
-    Wire.begin();
+    Wire.begin(21,22);
     u8g2.begin();
     u8g2.enableUTF8Print();	
     u8g2.setFont(fontName);
